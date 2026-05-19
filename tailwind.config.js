@@ -1,0 +1,133 @@
+/** @type {import('tailwindcss').Config} */
+const v = (name) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
+export default {
+  darkMode: 'class',
+  content: ['./index.html', './src/**/*.{js,jsx}'],
+  theme: {
+    extend: {
+      colors: {
+        // Theme-aware tokens (driven by CSS variables in index.css)
+        background: v('background'),
+        surface: v('surface'),
+        'surface-bright': v('surface-bright'),
+        'surface-dim': v('surface-dim'),
+        'surface-variant': v('surface-variant'),
+        'surface-container-lowest': v('surface-container-lowest'),
+        'surface-container-low': v('surface-container-low'),
+        'surface-container': v('surface-container'),
+        'surface-container-high': v('surface-container-high'),
+        'surface-container-highest': v('surface-container-highest'),
+        'surface-tint': v('surface-tint'),
+        'on-surface': v('on-surface'),
+        'on-surface-variant': v('on-surface-variant'),
+        'on-background': v('on-background'),
+        outline: v('outline'),
+        'outline-variant': v('outline-variant'),
+        primary: v('primary'),
+        'primary-container': v('primary-container'),
+        'on-primary': v('on-primary'),
+        'on-primary-container': v('on-primary-container'),
+        'inverse-primary': v('inverse-primary'),
+        secondary: v('secondary'),
+        'secondary-container': v('secondary-container'),
+        'on-secondary': v('on-secondary'),
+        'on-secondary-container': v('on-secondary-container'),
+        tertiary: v('tertiary'),
+        'tertiary-container': v('tertiary-container'),
+        'on-tertiary': v('on-tertiary'),
+        'on-tertiary-container': v('on-tertiary-container'),
+        error: v('error'),
+        'error-container': v('error-container'),
+        'on-error': v('on-error'),
+        'on-error-container': v('on-error-container'),
+        success: v('success'),
+        'inverse-surface': v('inverse-surface'),
+        'inverse-on-surface': v('inverse-on-surface'),
+
+        // GoLinkGone brand accents (electric — matches the logo)
+        'brand-cyan': v('brand-cyan'),
+        'brand-blue': v('brand-blue'),
+        'brand-purple': v('brand-purple'),
+        'brand-ink': v('brand-ink'),
+
+        // Static "fixed" tokens (kept identical in both themes by design)
+        'primary-fixed': '#dbe1ff',
+        'primary-fixed-dim': '#b4c5ff',
+        'on-primary-fixed': '#00174b',
+        'on-primary-fixed-variant': '#003ea8',
+        'secondary-fixed': '#d3e4fe',
+        'secondary-fixed-dim': '#b7c8e1',
+        'on-secondary-fixed': '#0b1c30',
+        'on-secondary-fixed-variant': '#38485d',
+        'tertiary-fixed': '#6ffbbe',
+        'tertiary-fixed-dim': '#4edea3',
+        'on-tertiary-fixed': '#002113',
+        'on-tertiary-fixed-variant': '#005236',
+      },
+      borderRadius: {
+        DEFAULT: '0.25rem',
+        lg: '0.5rem',
+        xl: '0.75rem',
+        '2xl': '1rem',
+        full: '9999px',
+      },
+      spacing: {
+        gutter: '24px',
+        xs: '4px',
+        md: '24px',
+        base: '8px',
+        sm: '12px',
+        lg: '40px',
+        xl: '64px',
+        margin: '32px',
+      },
+      maxWidth: {
+        'max-width': '1280px',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'headline-lg-mobile': ['24px', { lineHeight: '1.3', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '1.6', fontWeight: '400' }],
+        'body-sm': ['14px', { lineHeight: '1.5', fontWeight: '400' }],
+        'headline-md': ['24px', { lineHeight: '1.4', fontWeight: '600' }],
+        'headline-lg': ['32px', { lineHeight: '1.3', letterSpacing: '-0.01em', fontWeight: '600' }],
+        'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
+        'display-lg': ['48px', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'label-caps': ['12px', { lineHeight: '1.2', letterSpacing: '0.05em', fontWeight: '600' }],
+      },
+      boxShadow: {
+        soft: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03)',
+        elevated: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+        glow: '0 10px 40px -10px rgba(42, 76, 255, 0.45), 0 4px 18px -6px rgba(0, 212, 255, 0.35)',
+        'glow-sm': '0 6px 24px -8px rgba(42, 76, 255, 0.35)',
+      },
+      backgroundImage: {
+        'brand-gradient': 'linear-gradient(135deg, rgb(var(--c-brand-cyan)) 0%, rgb(var(--c-brand-blue)) 55%, rgb(var(--c-brand-purple)) 100%)',
+        'brand-gradient-soft': 'linear-gradient(135deg, rgb(var(--c-brand-cyan) / 0.18) 0%, rgb(var(--c-brand-blue) / 0.18) 55%, rgb(var(--c-brand-purple) / 0.18) 100%)',
+      },
+      keyframes: {
+        'float-slow': {
+          '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+          '50%': { transform: 'translate(20px, -30px) scale(1.05)' },
+        },
+        'float-slower': {
+          '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+          '50%': { transform: 'translate(-25px, 20px) scale(1.08)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+      },
+      animation: {
+        'float-slow': 'float-slow 14s ease-in-out infinite',
+        'float-slower': 'float-slower 18s ease-in-out infinite',
+        shimmer: 'shimmer 3s linear infinite',
+      },
+    },
+  },
+  plugins: [],
+};

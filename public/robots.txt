@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /$
+Allow: /auth
+Disallow: /links
+Disallow: /links/*
+Disallow: /account
+Disallow: /api
+Crawl-delay: 5
+

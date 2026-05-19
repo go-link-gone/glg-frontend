@@ -1,0 +1,13 @@
+# Environment Variables
+.env
+
+# Node Modules
+node_modules/
+
+# Build Output
+dist/
+
+# Claude files
+CLAUDE.md
+.claude/
+
