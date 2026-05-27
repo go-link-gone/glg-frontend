@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import MyLinksPage from './pages/MyLinksPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ComingSoonPage from './pages/ComingSoonPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import Spinner from './components/Spinner';
 
 // Recharts is heavy; only pay for it when the user opens an analytics page.
@@ -45,14 +46,8 @@ export default function App() {
             </PublicOnly>
           }
         />
-        <Route
-          path="/"
-          element={
-            <Protected>
-              <HomePage />
-            </Protected>
-          }
-        />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/" element={<HomePage />} />
         <Route
           path="/links"
           element={

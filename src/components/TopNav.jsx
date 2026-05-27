@@ -67,77 +67,91 @@ export default function TopNav() {
           <BrandMark size={44} />
           <nav className="hidden gap-6 md:flex">
             <NavLink to="/" end className={linkClass}>Shorten</NavLink>
-            <NavLink to="/links" className={linkClass}>My Links</NavLink>
+            {user && <NavLink to="/links" className={linkClass}>My Links</NavLink>}
           </nav>
         </div>
 
         <div className="relative flex items-center gap-3" ref={menuRef}>
           <ThemeToggle />
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest pl-1 pr-3 py-1 text-body-sm text-on-surface transition-colors hover:bg-surface-container"
-            aria-haspopup="menu"
-            aria-expanded={open}
-          >
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-gradient text-white font-semibold shadow-glow-sm">
-              {initials(user)}
-            </span>
-            <span className="hidden max-w-[160px] truncate md:inline">
-              {user?.email ?? 'Account'}
-            </span>
-            <span className="material-symbols-outlined text-secondary" style={{ fontSize: 18 }}>
-              expand_more
-            </span>
-          </button>
+          {user ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest pl-1 pr-3 py-1 text-body-sm text-on-surface transition-colors hover:bg-surface-container"
+                aria-haspopup="menu"
+                aria-expanded={open}
+              >
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-gradient text-white font-semibold shadow-glow-sm">
+                  {initials(user)}
+                </span>
+                <span className="hidden max-w-[160px] truncate md:inline">
+                  {user.email}
+                </span>
+                <span className="material-symbols-outlined text-secondary" style={{ fontSize: 18 }}>
+                  expand_more
+                </span>
+              </button>
 
-          {open && (
-            <div
-              role="menu"
-              className="absolute right-0 top-12 w-64 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-elevated"
+              {open && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-12 w-64 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-elevated"
+                >
+                  <div className="border-b border-outline-variant px-4 py-3">
+                    <div className="text-label-caps uppercase text-secondary">Signed in as</div>
+                    <div className="truncate text-body-sm text-on-surface">{user.email}</div>
+                  </div>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setOpen(false);
+                      setChangePwOpen(true);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-body-sm text-on-surface hover:bg-surface-container"
+                  >
+                    <span className="material-symbols-outlined text-secondary" style={{ fontSize: 20 }}>
+                      lock_reset
+                    </span>
+                    Change Password
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-body-sm text-on-surface hover:bg-surface-container"
+                  >
+                    <span className="material-symbols-outlined text-secondary" style={{ fontSize: 20 }}>
+                      logout
+                    </span>
+                    Log Out
+                  </button>
+                  <div className="border-t border-outline-variant" />
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setOpen(false);
+                      setDeleteOpen(true);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-body-sm text-error hover:bg-error-container"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                      delete_forever
+                    </span>
+                    Delete Account
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <NavLink
+              to="/auth"
+              className="brand-btn flex items-center gap-2 rounded-full px-4 py-2 text-body-sm font-semibold"
             >
-              <div className="border-b border-outline-variant px-4 py-3">
-                <div className="text-label-caps uppercase text-secondary">Signed in as</div>
-                <div className="truncate text-body-sm text-on-surface">{user?.email}</div>
-              </div>
-              <button
-                role="menuitem"
-                onClick={() => {
-                  setOpen(false);
-                  setChangePwOpen(true);
-                }}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-body-sm text-on-surface hover:bg-surface-container"
-              >
-                <span className="material-symbols-outlined text-secondary" style={{ fontSize: 20 }}>
-                  lock_reset
-                </span>
-                Change Password
-              </button>
-              <button
-                role="menuitem"
-                onClick={handleLogout}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-body-sm text-on-surface hover:bg-surface-container"
-              >
-                <span className="material-symbols-outlined text-secondary" style={{ fontSize: 20 }}>
-                  logout
-                </span>
-                Log Out
-              </button>
-              <div className="border-t border-outline-variant" />
-              <button
-                role="menuitem"
-                onClick={() => {
-                  setOpen(false);
-                  setDeleteOpen(true);
-                }}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-body-sm text-error hover:bg-error-container"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-                  delete_forever
-                </span>
-                Delete Account
-              </button>
-            </div>
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                login
+              </span>
+              Sign In
+            </NavLink>
           )}
         </div>
       </div>
@@ -145,7 +159,7 @@ export default function TopNav() {
       <ChangePasswordModal
         open={changePwOpen}
         onClose={() => setChangePwOpen(false)}
-        userEmail={user?.email}
+        user={user}
       />
 
       <Modal open={deleteOpen} onClose={() => !deleting && setDeleteOpen(false)} labelledBy="delete-acct-title">
@@ -185,12 +199,21 @@ export default function TopNav() {
   );
 }
 
-function ChangePasswordModal({ open, onClose, userEmail }) {
+function hasPasswordIdentity(user) {
+  const ids = user?.identities;
+  if (!Array.isArray(ids)) return false;
+  return ids.some((i) => i.provider === 'email');
+}
+
+function ChangePasswordModal({ open, onClose, user }) {
   const { pushToast } = useToast();
   const [pwd, setPwd] = useState('');
   const [confirm, setConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
+
+  const userEmail = user?.email;
+  const canResetByEmail = hasPasswordIdentity(user);
 
   const reset = () => {
     setPwd('');
@@ -225,10 +248,10 @@ function ChangePasswordModal({ open, onClose, userEmail }) {
   };
 
   const sendReset = async () => {
-    if (!userEmail) return;
+    if (!userEmail || !canResetByEmail) return;
     setSendingReset(true);
     const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-      redirectTo: `${window.location.origin}/`,
+      redirectTo: `${window.location.origin}/reset-password`,
     });
     setSendingReset(false);
     if (error) {
@@ -254,7 +277,9 @@ function ChangePasswordModal({ open, onClose, userEmail }) {
               Change Password
             </h3>
             <p className="mt-1 text-body-sm text-on-surface-variant">
-              Enter a new password, or email yourself a reset link.
+              {canResetByEmail
+                ? 'Enter a new password, or email yourself a reset link.'
+                : "You signed in with Google. Set a password here to enable email sign-in, or manage your Google password in your Google account."}
             </p>
           </div>
         </div>
@@ -283,14 +308,18 @@ function ChangePasswordModal({ open, onClose, userEmail }) {
           </label>
         </div>
         <div className="mt-md flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            disabled={sendingReset || !userEmail}
-            onClick={sendReset}
-            className="text-body-sm font-medium text-primary hover:underline disabled:opacity-50"
-          >
-            {sendingReset ? 'Sending…' : 'Email me a reset link instead'}
-          </button>
+          {canResetByEmail ? (
+            <button
+              type="button"
+              disabled={sendingReset || !userEmail}
+              onClick={sendReset}
+              className="text-body-sm font-medium text-primary hover:underline disabled:opacity-50"
+            >
+              {sendingReset ? 'Sending…' : 'Email me a reset link instead'}
+            </button>
+          ) : (
+            <span />
+          )}
           <div className="flex gap-2">
             <button
               type="button"

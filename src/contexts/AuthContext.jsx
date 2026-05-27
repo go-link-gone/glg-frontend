@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext({
@@ -10,6 +11,7 @@ const AuthContext = createContext({
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -18,14 +20,17 @@ export function AuthProvider({ children }) {
       setSession(data.session ?? null);
       setLoading(false);
     });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
+      if (event === 'PASSWORD_RECOVERY') {
+        navigate('/reset-password', { replace: true });
+      }
     });
     return () => {
       mounted = false;
       sub.subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ session, user: session?.user ?? null, loading }}>

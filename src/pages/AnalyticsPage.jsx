@@ -49,21 +49,29 @@ const TIME_RANGES = [
   { value: 'all', label: 'All time' },
 ];
 
+// Each timeRange exposes exactly the granularity its backing query supports:
+//   24h → hourly (unique_visitors_log)
+//   7d  → daily  (unique_visitors_log)
+//   30d → daily / weekly (weekly disabled — backend supports it but the UX is
+//                          still being designed, shows a "Coming soon" badge)
+//   all → monthly (link_stats_monthly; no other granularity is meaningful)
 const GRANULARITY_BY_RANGE = {
-  '24h': [{ value: 'hour', label: 'Hourly' }],
-  '7d': [
-    { value: 'hour', label: 'Hourly' },
-    { value: 'day', label: 'Daily' },
-  ],
+  '24h': [{ value: 'hour',  label: 'Hourly' }],
+  '7d':  [{ value: 'day',   label: 'Daily' }],
   '30d': [
-    { value: 'day', label: 'Daily' },
-    { value: 'week', label: 'Weekly' },
+    { value: 'day',  label: 'Daily' },
+    { value: 'week', label: 'Weekly', comingSoon: true, disabled: true },
   ],
-  all: [
-    { value: 'day', label: 'Daily' },
-    { value: 'week', label: 'Weekly' },
-  ],
+  all:   [{ value: 'month', label: 'Monthly' }],
 };
+
+function resolveUserTz() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
 
 const DEVICE_COLORS = {
   PHONE: '#2563eb',
@@ -72,81 +80,88 @@ const DEVICE_COLORS = {
   UNKNOWN: '#737686',
 };
 
-function startOfWeekUtc(date) {
-  const d = new Date(date);
-  const day = d.getUTCDay();
-  // Week starts Monday for chart readability
-  const diff = (day + 6) % 7;
-  d.setUTCDate(d.getUTCDate() - diff);
-  d.setUTCHours(0, 0, 0, 0);
-  return d;
-}
-
-function startOfDayUtc(date) {
-  const d = new Date(date);
-  d.setUTCHours(0, 0, 0, 0);
-  return d;
-}
-
-function startOfHourUtc(date) {
-  const d = new Date(date);
-  d.setUTCMinutes(0, 0, 0);
-  return d;
-}
-
-function rebucket(totals, granularity) {
+// Backend buckets in the user's timezone and emits ISO strings with `Z` whose digits
+// match wall-clock-in-tz. Parsing as UTC and formatting with `timeZone: 'UTC'` below
+// reproduces the user's local label without further conversion.
+//
+// `uniqueVisitors` is COUNT(DISTINCT visitor_hash) for the bucket on dynamic
+// ranges, and null on the All-Time monthly view (link_stats_monthly doesn't
+// carry distinct-hash data). The Unique Visitors <Line> is conditionally
+// rendered for that reason — no in-data fallback needed.
+function toSeries(totals) {
   if (!Array.isArray(totals)) return [];
-  const buckets = new Map();
-  const bucketFn =
-    granularity === 'week'
-      ? startOfWeekUtc
-      : granularity === 'day'
-      ? startOfDayUtc
-      : startOfHourUtc;
-
-  for (const point of totals) {
-    if (!point?.bucket) continue;
-    const date = new Date(point.bucket);
-    if (Number.isNaN(date.getTime())) continue;
-    const key = bucketFn(date).toISOString();
-    const prev = buckets.get(key) ?? { total: 0, newVisitors: 0 };
-    buckets.set(key, {
-      total: prev.total + Number(point.total ?? 0),
-      newVisitors: prev.newVisitors + Number(point.newVisitors ?? 0),
-    });
-  }
-  return [...buckets.entries()]
-    .map(([iso, v]) => ({ ts: iso, total: v.total, newVisitors: v.newVisitors }))
-    .sort((a, b) => new Date(a.ts) - new Date(b.ts));
+  return totals
+    .filter((p) => p && p.bucket)
+    .map((p) => ({
+      ts: p.bucket,
+      total: Number(p.total ?? 0),
+      newVisitors: Number(p.newVisitors ?? 0),
+      uniqueVisitors: p.uniqueVisitors != null ? Number(p.uniqueVisitors) : null,
+    }));
 }
+
+// Per-metric chart colors — shared by the Line stroke, the legend dot, and the
+// tooltip dot so the visual mapping is unambiguous everywhere.
+const METRIC_COLORS = {
+  total:           '#2563eb', // blue
+  newVisitors:     '#10B981', // green
+  uniqueVisitors:  '#8b5cf6', // violet
+};
+
+// Browser-native ISO alpha-2 → full country name. Falls back to the raw code
+// for anything Intl can't resolve (e.g. our "UNKNOWN" sentinel from MaxMind).
+const COUNTRY_NAMES = (() => {
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'region' });
+  } catch {
+    return null;
+  }
+})();
+function countryName(code) {
+  if (!code) return 'Unknown';
+  try {
+    const name = COUNTRY_NAMES?.of(code);
+    return name && name !== code ? name : code;
+  } catch {
+    return code;
+  }
+}
+
+const DAY_OPTS = { day: 'numeric', month: 'short', timeZone: 'UTC' };
+const HOUR_OPTS = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' };
+const MONTH_OPTS = { month: 'short', year: 'numeric', timeZone: 'UTC' };
+const MONTH_LONG_OPTS = { month: 'long', year: 'numeric', timeZone: 'UTC' };
 
 function formatTick(ts, granularity) {
   const d = new Date(ts);
   if (granularity === 'hour') {
-    return d.toLocaleTimeString(undefined, { hour: 'numeric' });
+    return d.toLocaleTimeString('en-GB', HOUR_OPTS);
   }
   if (granularity === 'week') {
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const end = new Date(d);
+    end.setUTCDate(end.getUTCDate() + 6);
+    return `${d.toLocaleDateString('en-GB', DAY_OPTS)}-${end.toLocaleDateString('en-GB', DAY_OPTS)}`;
   }
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  if (granularity === 'month') {
+    return d.toLocaleDateString('en-GB', MONTH_OPTS);
+  }
+  return d.toLocaleDateString('en-GB', DAY_OPTS);
 }
 
 function formatTooltipLabel(ts, granularity) {
   const d = new Date(ts);
   if (granularity === 'hour') {
-    return d.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+    return `${d.toLocaleDateString('en-GB', DAY_OPTS)}, ${d.toLocaleTimeString('en-GB', HOUR_OPTS)}`;
   }
   if (granularity === 'week') {
     const end = new Date(d);
     end.setUTCDate(end.getUTCDate() + 6);
-    return `Week of ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+    return `${d.toLocaleDateString('en-GB', DAY_OPTS)} - ${end.toLocaleDateString('en-GB', DAY_OPTS)}`;
   }
-  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  if (granularity === 'month') {
+    return d.toLocaleDateString('en-GB', MONTH_LONG_OPTS);
+  }
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
 }
 
 export default function AnalyticsPage() {
@@ -163,6 +178,7 @@ export default function AnalyticsPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const { theme } = useTheme();
   const chartC = CHART_THEME[theme === 'dark' ? 'dark' : 'light'];
+  const userTz = useMemo(resolveUserTz, []);
 
   useEffect(() => {
     const opts = GRANULARITY_BY_RANGE[timeRange];
@@ -172,12 +188,18 @@ export default function AnalyticsPage() {
   }, [timeRange, granularity]);
 
   useEffect(() => {
+    // Skip fetch when granularity hasn't yet been normalized for the new timeRange.
+    // Otherwise switching timeRange triggers a wasted fetch with the stale granularity
+    // before the normalize effect above runs.
+    const opts = GRANULARITY_BY_RANGE[timeRange] ?? [];
+    if (!opts.find((o) => o.value === granularity)) return undefined;
+
     let cancelled = false;
     (async () => {
       setLoading(true);
       setError(null);
       try {
-        const result = await fetchDashboard(shortKey, timeRange);
+        const result = await fetchDashboard(shortKey, timeRange, granularity, userTz);
         if (!cancelled) setData(result);
       } catch (err) {
         if (!cancelled) {
@@ -191,15 +213,16 @@ export default function AnalyticsPage() {
     return () => {
       cancelled = true;
     };
-  }, [shortKey, timeRange, refreshKey, pushToast]);
+  }, [shortKey, timeRange, granularity, userTz, refreshKey, pushToast]);
 
-  const series = useMemo(
-    () => rebucket(data?.totals ?? [], granularity),
-    [data, granularity]
-  );
+  const series = useMemo(() => toSeries(data?.totals ?? []), [data]);
 
   const totalClicks = data?.totalClicks ?? 0;
-  const uniqueVisitors = data?.uniqueClicks ?? 0;
+  const newVisitors = data?.newVisitors ?? 0;
+  const isAllTime = timeRange === 'all';
+  // Unique Visitors line is hidden on the All-Time monthly view — the backing
+  // table (link_stats_monthly) holds no per-month distinct-hash data.
+  const showUnique = !isAllTime;
   const link = state?.link;
   const shortUrl = link?.shortUrl ?? `/${shortKey}`;
 
@@ -284,15 +307,18 @@ export default function AnalyticsPage() {
             />
             <SummaryCard
               className="md:col-span-6"
-              label="Unique Visitors"
-              value={uniqueVisitors}
+              label="New Visitors"
+              value={newVisitors}
               accent="text-tertiary-container"
               icon="group"
             />
 
             <Card className="md:col-span-12">
               <CardHeader title="Traffic Overview">
-                <Legend2 />
+                <div className="flex items-center gap-md">
+                  <Legend2 showUnique={showUnique} />
+                  <TimezoneBadge tz={userTz} />
+                </div>
               </CardHeader>
               <div className="h-72 w-full">
                 {series.length === 0 ? (
@@ -318,38 +344,39 @@ export default function AnalyticsPage() {
                         width={36}
                       />
                       <Tooltip
-                        contentStyle={{
-                          background: chartC.tooltipBg,
-                          border: `1px solid ${chartC.tooltipBorder}`,
-                          borderRadius: 12,
-                          fontSize: 12,
-                          color: chartC.tooltipText,
-                          boxShadow: '0 8px 16px rgba(0,0,0,0.18)',
-                        }}
-                        labelStyle={{ color: chartC.tooltipText }}
-                        itemStyle={{ color: chartC.tooltipText }}
-                        labelFormatter={(v) => formatTooltipLabel(v, granularity)}
-                        formatter={(value, name) => [value, name === 'total' ? 'Total Clicks' : 'Unique']}
+                        content={<MetricTooltip granularity={granularity} chartC={chartC} />}
                       />
                       <Line
                         type="monotone"
                         dataKey="total"
                         name="Total Clicks"
-                        stroke="#2563eb"
+                        stroke={METRIC_COLORS.total}
                         strokeWidth={2.25}
-                        dot={{ r: 3, fill: '#2563eb', stroke: '#fff', strokeWidth: 1.5 }}
+                        dot={{ r: 3, fill: METRIC_COLORS.total, stroke: '#fff', strokeWidth: 1.5 }}
                         activeDot={{ r: 5 }}
                       />
                       <Line
                         type="monotone"
                         dataKey="newVisitors"
-                        name="Unique"
-                        stroke="#10B981"
+                        name="New Visitors"
+                        stroke={METRIC_COLORS.newVisitors}
                         strokeWidth={2}
                         strokeDasharray="4 4"
-                        dot={{ r: 3, fill: '#10B981', stroke: '#fff', strokeWidth: 1.5 }}
+                        dot={{ r: 3, fill: METRIC_COLORS.newVisitors, stroke: '#fff', strokeWidth: 1.5 }}
                         activeDot={{ r: 5 }}
                       />
+                      {showUnique && (
+                        <Line
+                          type="monotone"
+                          dataKey="uniqueVisitors"
+                          name="Unique Visitors"
+                          stroke={METRIC_COLORS.uniqueVisitors}
+                          strokeWidth={2}
+                          strokeDasharray="2 4"
+                          dot={{ r: 3, fill: METRIC_COLORS.uniqueVisitors, stroke: '#fff', strokeWidth: 1.5 }}
+                          activeDot={{ r: 5 }}
+                        />
+                      )}
                     </LineChart>
                   </ResponsiveContainer>
                 )}
@@ -360,7 +387,7 @@ export default function AnalyticsPage() {
               <CardHeader title="Top Countries" />
               <RowChart
                 items={(data?.topCountries ?? []).map((c) => ({
-                  label: c.country || 'Unknown',
+                  label: countryName(c.country),
                   total: Number(c.total ?? 0),
                   newVisitors: Number(c.newVisitors ?? 0),
                 }))}
@@ -374,7 +401,7 @@ export default function AnalyticsPage() {
               <RowChart
                 items={(data?.topCities ?? []).map((c) => ({
                   label: c.city || 'Unknown',
-                  sub: c.country,
+                  sub: countryName(c.country),
                   total: Number(c.total ?? 0),
                   newVisitors: Number(c.newVisitors ?? 0),
                 }))}
@@ -405,20 +432,33 @@ function SegmentedControl({ options, value, onChange, ariaLabel }) {
     >
       {options.map((opt) => {
         const active = opt.value === value;
+        const disabled = !!opt.disabled;
         return (
           <button
             key={opt.value}
             role="tab"
             aria-selected={active}
-            onClick={() => onChange(opt.value)}
+            aria-disabled={disabled}
+            disabled={disabled}
+            onClick={() => !disabled && onChange(opt.value)}
+            title={disabled && opt.comingSoon ? 'Coming soon' : undefined}
             className={
               'flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-body-sm transition-colors md:flex-initial ' +
               (active
                 ? 'bg-primary-container text-on-primary font-semibold shadow-soft'
-                : 'text-secondary hover:text-primary')
+                : disabled
+                  ? 'cursor-not-allowed text-secondary opacity-60'
+                  : 'text-secondary hover:text-primary')
             }
           >
-            {opt.label}
+            <span className="inline-flex items-center gap-1.5">
+              {opt.label}
+              {opt.comingSoon && (
+                <span className="rounded-full bg-tertiary-container px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-on-tertiary-container">
+                  Soon
+                </span>
+              )}
+            </span>
           </button>
         );
       })}
@@ -448,18 +488,36 @@ function CardHeader({ title, children }) {
   );
 }
 
-function Legend2() {
+function TimezoneBadge({ tz }) {
+  return (
+    <span
+      title={`Times shown in ${tz}`}
+      className="inline-flex items-center gap-1 rounded-full border border-outline-variant bg-surface-container px-2 py-0.5 text-label-caps uppercase text-secondary"
+    >
+      <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+        schedule
+      </span>
+      {tz}
+    </span>
+  );
+}
+
+function Legend2({ showUnique = true }) {
   return (
     <div className="hidden gap-md text-body-sm text-secondary sm:flex">
-      <span className="flex items-center gap-1">
-        <span className="h-3 w-3 rounded-full bg-primary-container" />
-        Total Clicks
-      </span>
-      <span className="flex items-center gap-1">
-        <span className="h-3 w-3 rounded-full bg-success" />
-        Unique
-      </span>
+      <LegendDot color={METRIC_COLORS.total} label="Total Clicks" />
+      <LegendDot color={METRIC_COLORS.newVisitors} label="New Visitors" />
+      {showUnique && <LegendDot color={METRIC_COLORS.uniqueVisitors} label="Unique Visitors" />}
     </div>
+  );
+}
+
+function LegendDot({ color, label }) {
+  return (
+    <span className="flex items-center gap-1">
+      <span className="h-3 w-3 rounded-full" style={{ background: color }} />
+      {label}
+    </span>
   );
 }
 
@@ -622,6 +680,51 @@ function EmptyChart({ message }) {
   return (
     <div className="grid h-full min-h-[180px] place-items-center rounded-xl border border-dashed border-outline-variant bg-surface text-body-sm text-secondary">
       {message}
+    </div>
+  );
+}
+
+// Custom tooltip — iterates Recharts' payload directly. payload contains one
+// entry per <Line> currently rendered, so we get 3 rows on dynamic ranges and
+// 2 on All-Time without any in-tooltip conditionals.
+function MetricTooltip({ active, payload, label, granularity, chartC }) {
+  if (!active || !payload || payload.length === 0) return null;
+  return (
+    <div
+      style={{
+        background: chartC.tooltipBg,
+        border: `1px solid ${chartC.tooltipBorder}`,
+        borderRadius: 12,
+        color: chartC.tooltipText,
+        boxShadow: '0 8px 16px rgba(0,0,0,0.18)',
+        padding: '8px 12px',
+        fontSize: 12,
+        minWidth: 180,
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>
+        {formatTooltipLabel(label, granularity)}
+      </div>
+      {payload.map((entry) => (
+        <TooltipRow
+          key={entry.dataKey}
+          color={entry.color || entry.stroke}
+          label={entry.name}
+          value={Number(entry.value ?? 0).toLocaleString()}
+        />
+      ))}
+    </div>
+  );
+}
+
+function TooltipRow({ color, label, value }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 2 }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 8, height: 8, borderRadius: 999, background: color, display: 'inline-block' }} />
+        {label}
+      </span>
+      <span style={{ fontWeight: 600 }}>{value}</span>
     </div>
   );
 }

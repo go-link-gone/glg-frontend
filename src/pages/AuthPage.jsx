@@ -35,6 +35,7 @@ function GoogleIcon() {
 
 export default function AuthPage() {
   const redirectTo = `${window.location.origin}/`;
+  const resetRedirectTo = `${window.location.origin}/reset-password`;
 
   const [mode, setMode] = useState(MODE_SIGN_IN);
   const [email, setEmail] = useState('');
@@ -100,6 +101,10 @@ export default function AuthPage() {
       // Email confirmation disabled — already signed in.
       return;
     }
+    if (data.user && (!data.user.identities || data.user.identities.length === 0)) {
+      setError('An account already exists for this email. Please sign in instead.');
+      return;
+    }
     setOtp('');
     setMode(MODE_VERIFY_OTP);
     setInfo(`We sent a 6-digit code to ${email}. Enter it below to finish creating your account.`);
@@ -146,7 +151,7 @@ export default function AuthPage() {
     clearStatus();
     setLoading(true);
     const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo,
+      redirectTo: resetRedirectTo,
     });
     setLoading(false);
     if (err) {
