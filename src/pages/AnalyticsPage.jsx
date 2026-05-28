@@ -176,6 +176,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [copied, setCopied] = useState(false);
   const { theme } = useTheme();
   const chartC = CHART_THEME[theme === 'dark' ? 'dark' : 'light'];
   const userTz = useMemo(resolveUserTz, []);
@@ -225,6 +226,17 @@ export default function AnalyticsPage() {
   const showUnique = !isAllTime;
   const link = state?.link;
   const shortUrl = link?.shortUrl ?? `/${shortKey}`;
+  const displayShortUrl = shortUrl.replace(/^https?:\/\//, '');
+
+  const copyShortUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(shortUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      pushToast({ type: 'error', title: 'Copy failed' });
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -245,9 +257,30 @@ export default function AnalyticsPage() {
         <div className="flex flex-col gap-md md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
             <div className="text-label-caps uppercase text-secondary">Link Analytics</div>
-            <h1 className="mt-1 truncate text-headline-lg-mobile font-semibold text-on-surface md:text-headline-lg">
-              {shortUrl}
-            </h1>
+            <div className="mt-1 flex items-center gap-2">
+              <h1 className="min-w-0 truncate text-headline-lg-mobile font-semibold md:text-headline-lg">
+                <a
+                  href={shortUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="brand-text hover:underline"
+                  title={shortUrl}
+                >
+                  {displayShortUrl}
+                </a>
+              </h1>
+              <button
+                type="button"
+                onClick={copyShortUrl}
+                aria-label="Copy short link"
+                className="flex flex-shrink-0 items-center gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 text-body-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                  {copied ? 'check' : 'content_copy'}
+                </span>
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
             {link?.originalUrl && (
               <p className="mt-1 truncate text-body-sm text-on-surface-variant" title={link.originalUrl}>
                 Redirects to {link.originalUrl}
@@ -297,7 +330,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
         ) : (
-          <div className="mt-md grid grid-cols-1 gap-md md:grid-cols-12">
+          <div className="mt-md grid grid-cols-1 gap-md md:grid-cols-12 md:items-start">
             <SummaryCard
               className="md:col-span-6"
               label="Total Clicks"
@@ -678,7 +711,7 @@ function DeviceBreakdown({ devices, chartC }) {
 
 function EmptyChart({ message }) {
   return (
-    <div className="grid h-full min-h-[180px] place-items-center rounded-xl border border-dashed border-outline-variant bg-surface text-body-sm text-secondary">
+    <div className="grid h-full min-h-[140px] place-items-center rounded-xl border border-dashed border-outline-variant bg-surface px-4 py-8 text-body-sm text-secondary">
       {message}
     </div>
   );

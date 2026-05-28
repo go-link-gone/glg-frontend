@@ -237,7 +237,7 @@ export default function MyLinksPage() {
 function LinkRow({ link, onCopy, onAnalytics, onDelete }) {
   return (
     <div className="grid grid-cols-1 items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-soft transition-shadow hover:shadow-md md:grid-cols-12">
-      <div className="flex flex-col md:col-span-3">
+      <div className="flex min-w-0 flex-col md:col-span-3">
         <span className="text-label-caps uppercase text-secondary md:hidden">Short Link</span>
         <a
           href={link.shortUrl}
@@ -249,7 +249,7 @@ function LinkRow({ link, onCopy, onAnalytics, onDelete }) {
           {link.shortUrl}
         </a>
       </div>
-      <div className="flex flex-col md:col-span-5">
+      <div className="flex min-w-0 flex-col md:col-span-5">
         <span className="text-label-caps uppercase text-secondary md:hidden">Original URL</span>
         <span className="truncate text-body-sm text-on-surface-variant" title={link.originalUrl}>
           {link.originalUrl}

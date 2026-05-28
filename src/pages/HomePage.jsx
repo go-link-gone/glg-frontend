@@ -172,7 +172,7 @@ export default function HomePage() {
         {result && (
           <div className="brand-border mt-md w-full max-w-3xl rounded-2xl bg-surface-container-lowest/90 p-md shadow-elevated backdrop-blur-xl">
             <div className="flex flex-col gap-md md:flex-row md:items-stretch md:gap-md">
-              <div className="flex-1 space-y-md">
+              <div className="min-w-0 flex-1 space-y-md">
                 <div>
                   <div className="text-label-caps uppercase text-secondary">Original URL</div>
                   <div

@@ -30,8 +30,8 @@ export default function ResetPasswordPage() {
   const submit = async (e) => {
     e.preventDefault();
     setError(null);
-    if (pwd.length < 8) {
-      setError('Password must be at least 8 characters.');
+    if (pwd.length < 6) {
+      setError('Password must be at least 6 characters.');
       return;
     }
     if (pwd !== confirm) {
@@ -133,7 +133,7 @@ export default function ResetPasswordPage() {
                 className="mt-1 block h-11 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-body-md text-on-surface outline-none transition-colors placeholder:text-outline focus:border-brand-blue disabled:opacity-50"
                 placeholder="••••••••"
               />
-              <p className="mt-1 text-body-sm text-on-surface-variant">At least 8 characters.</p>
+              <p className="mt-1 text-body-sm text-on-surface-variant">At least 6 characters.</p>
             </label>
             <label className="block">
               <span className="text-body-sm font-medium text-on-surface-variant">
