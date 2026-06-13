@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import ThemeToggle from '../components/ThemeToggle';
 import BrandMark from '../components/BrandMark';
 import Spinner from '../components/Spinner';
+import GridBackground from '../components/GridBackground';
 
 const MODE_SIGN_IN = 'sign_in';
 const MODE_SIGN_UP = 'sign_up';
@@ -189,120 +190,73 @@ export default function AuthPage() {
       : 'Sign in to manage your links and view analytics.';
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
-      {/* Ambient gradient blobs */}
-      <div
-        aria-hidden
-        className="brand-blob animate-float-slow"
-        style={{
-          width: 520,
-          height: 520,
-          left: -120,
-          top: -80,
-          background: 'radial-gradient(circle, rgb(var(--c-brand-cyan) / 0.55), transparent 60%)',
-        }}
-      />
-      <div
-        aria-hidden
-        className="brand-blob animate-float-slower"
-        style={{
-          width: 600,
-          height: 600,
-          right: -180,
-          top: 120,
-          background: 'radial-gradient(circle, rgb(var(--c-brand-purple) / 0.45), transparent 60%)',
-        }}
-      />
-      <div
-        aria-hidden
-        className="brand-blob animate-float-slow"
-        style={{
-          width: 460,
-          height: 460,
-          left: '38%',
-          bottom: -160,
-          background: 'radial-gradient(circle, rgb(var(--c-brand-blue) / 0.55), transparent 60%)',
-        }}
-      />
-
-      {/* Brand stripe */}
-      <header className="relative z-10 w-full border-b border-outline-variant/60 bg-surface-container-lowest/70 backdrop-blur-xl">
+    <div className="relative flex min-h-screen flex-col bg-background">
+      <header className="relative z-10 w-full border-b border-outline-variant/80 bg-surface/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-max-width items-center justify-between px-gutter">
-          <BrandMark size={44} />
+          <BrandMark size={30} />
           <div className="flex items-center gap-3">
             <a
               href="mailto:support@golinkgone.com?subject=Sign-in%20help"
-              className="hidden text-body-sm text-secondary hover:text-on-surface transition-colors md:inline"
+              className="hidden text-body-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface md:inline"
             >
-              Need help signing in?
+              Need help?
             </a>
             <ThemeToggle />
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 flex flex-1 items-center justify-center px-gutter py-margin">
-        {/* Decorative grid */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.18]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgb(var(--c-grid-line)) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--c-grid-line)) 1px, transparent 1px)',
-            backgroundSize: '56px 56px',
-            maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
-          }}
-        />
+      <main className="relative flex flex-1 items-center justify-center px-gutter py-margin">
+        <GridBackground />
 
-        <div className="relative grid w-full max-w-5xl gap-margin md:grid-cols-2">
-          {/* Left: marketing column */}
-          <div className="hidden flex-col justify-center md:flex">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest/80 px-3 py-1 text-label-caps uppercase tracking-wider text-secondary shadow-soft backdrop-blur">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
-              </span>
-              Built for performance marketers
-            </div>
-            <h1 className="mt-md text-display-lg font-extrabold leading-[1.05] tracking-tight text-on-surface">
-              Shorter links.<br />
-              <span className="brand-shimmer">Smarter insights.</span>
+        <div className="relative z-10 grid w-full max-w-5xl items-center gap-12 md:grid-cols-2 lg:gap-20">
+          {/* Left: product context */}
+          <div className="animate-fade-up hidden flex-col md:flex">
+            <span className="text-label-caps uppercase text-secondary">GoLinkGone</span>
+            <h1 className="mt-3 text-display-lg text-on-surface">
+              Shorten links.
+              <br />
+              Understand clicks.
             </h1>
-            <p className="mt-sm max-w-md text-body-lg text-on-surface-variant">
-              GoLinkGone shrinks any URL into a fast, trackable short link with
-              a built-in QR code — and gives you per-click analytics across
-              country, city, and device.
+            <p className="mt-4 max-w-md text-body-lg text-on-surface-variant">
+              Turn any URL into a fast, trackable short link with a built-in QR code —
+              and get per-click analytics across country, city, and device.
             </p>
-            <ul className="mt-md space-y-3 text-body-md text-on-surface-variant">
+            <ul className="mt-8 space-y-4">
               {[
-                ['bolt', 'Sub-second redirects, every time'],
-                ['public', 'Country & city level geo intelligence'],
-                ['devices', 'Device breakdown, deduped visitors'],
-              ].map(([icon, text]) => (
-                <li key={text} className="flex items-center gap-3">
-                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-gradient text-white shadow-glow-sm">
-                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                ['bolt', 'Sub-second redirects', 'Backed by an in-memory key store and Postgres.'],
+                ['public', 'Geo intelligence', 'Country and city breakdowns for every link.'],
+                ['devices', 'Device insights', 'Deduplicated unique visitors by device class.'],
+              ].map(([icon, title, body]) => (
+                <li key={title} className="flex items-start gap-3.5">
+                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-outline-variant bg-surface-container-lowest text-primary">
+                    <span className="material-symbols-outlined" style={{ fontSize: 19 }}>
                       {icon}
                     </span>
                   </span>
-                  {text}
+                  <div>
+                    <div className="text-body-md font-semibold text-on-surface">{title}</div>
+                    <div className="text-body-sm text-on-surface-variant">{body}</div>
+                  </div>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Right: auth card */}
-          <div className="brand-border rounded-2xl bg-surface-container-lowest/85 p-lg shadow-elevated backdrop-blur-xl md:p-margin">
-            <h2 className="text-headline-md font-bold text-on-surface">{cardHeading}</h2>
-            <p className="mt-1 text-body-sm text-on-surface-variant">{cardSub}</p>
+          <div className="animate-scale-in mx-auto w-full max-w-md rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-elevated md:p-8">
+            <div className="md:hidden">
+              <BrandMark size={30} />
+            </div>
+            <h2 className="mt-4 text-headline-md text-on-surface md:mt-0">{cardHeading}</h2>
+            <p className="mt-1.5 text-body-sm text-on-surface-variant">{cardSub}</p>
 
             {/* Tabs (hidden on OTP + forgot screens) */}
             {(mode === MODE_SIGN_IN || mode === MODE_SIGN_UP) && (
               <div
                 role="tablist"
                 aria-label="Authentication mode"
-                className="mt-md grid grid-cols-2 gap-1 rounded-xl border border-outline-variant bg-surface-container-low p-1"
+                className="mt-6 grid grid-cols-2 gap-1 rounded-xl border border-outline-variant bg-surface-container-low p-1"
               >
                 {[
                   [MODE_SIGN_IN, 'Sign in'],
@@ -318,8 +272,8 @@ export default function AuthPage() {
                       onClick={() => switchMode(key)}
                       className={`h-9 rounded-lg text-body-sm font-semibold transition-all ${
                         active
-                          ? 'bg-brand-gradient text-white shadow-glow-sm'
-                          : 'text-on-surface-variant hover:bg-surface-container'
+                          ? 'bg-surface-container-lowest text-on-surface shadow-soft'
+                          : 'text-on-surface-variant hover:text-on-surface'
                       }`}
                     >
                       {label}
@@ -333,13 +287,13 @@ export default function AuthPage() {
             {(error || info) && (
               <div
                 role={error ? 'alert' : 'status'}
-                className={`mt-md flex items-start gap-2 rounded-lg border px-3 py-2 text-body-sm ${
+                className={`mt-6 flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-body-sm ${
                   error
                     ? 'border-error/30 bg-error-container text-on-error-container'
                     : 'border-outline-variant bg-surface-container-low text-on-surface'
                 }`}
               >
-                <span className="material-symbols-outlined mt-0.5" style={{ fontSize: 18 }}>
+                <span className="material-symbols-outlined mt-0.5 shrink-0" style={{ fontSize: 18 }}>
                   {error ? 'error' : 'mark_email_read'}
                 </span>
                 <span className="flex-1">{error || info}</span>
@@ -347,9 +301,9 @@ export default function AuthPage() {
             )}
 
             {/* Forms */}
-            <div className="mt-md">
+            <div className="mt-6">
               {mode === MODE_SIGN_IN && (
-                <form onSubmit={handleSignIn} className="space-y-3">
+                <form onSubmit={handleSignIn} className="space-y-4">
                   <Field
                     label="Email address"
                     type="email"
@@ -370,7 +324,7 @@ export default function AuthPage() {
                     <button
                       type="button"
                       onClick={() => switchMode(MODE_FORGOT)}
-                      className="text-body-sm font-medium brand-text hover:underline"
+                      className="text-body-sm font-medium text-primary hover:underline"
                     >
                       Forgot your password?
                     </button>
@@ -380,7 +334,7 @@ export default function AuthPage() {
               )}
 
               {mode === MODE_SIGN_UP && (
-                <form onSubmit={handleSignUp} className="space-y-3">
+                <form onSubmit={handleSignUp} className="space-y-4">
                   <Field
                     label="Email address"
                     type="email"
@@ -403,11 +357,11 @@ export default function AuthPage() {
               )}
 
               {mode === MODE_VERIFY_OTP && (
-                <form onSubmit={handleVerifyOtp} className="space-y-3">
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
                   <div>
                     <label
                       htmlFor="otp"
-                      className="text-body-sm font-medium text-on-surface-variant"
+                      className="text-label-caps uppercase text-secondary"
                     >
                       6-digit code
                     </label>
@@ -423,10 +377,10 @@ export default function AuthPage() {
                         setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
                       }
                       placeholder="••••••"
-                      className="mt-1 block h-14 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-center font-mono text-[28px] font-semibold tracking-[0.5em] text-on-surface outline-none transition-colors placeholder:text-outline focus:border-brand-blue"
+                      className="mt-1.5 block h-14 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-center font-mono text-[28px] font-semibold tracking-[0.5em] text-on-surface outline-none transition-colors placeholder:text-outline focus:border-primary/70 focus:ring-2 focus:ring-primary/15"
                       required
                     />
-                    <p className="mt-1 text-body-sm text-on-surface-variant">
+                    <p className="mt-2 text-body-sm text-on-surface-variant">
                       Sent to <span className="font-medium text-on-surface">{email}</span>.
                     </p>
                   </div>
@@ -440,13 +394,13 @@ export default function AuthPage() {
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                         arrow_back
                       </span>
-                      Use a different email
+                      Different email
                     </button>
                     <button
                       type="button"
                       onClick={handleResendOtp}
                       disabled={resendIn > 0 || loading}
-                      className="text-body-sm font-semibold brand-text hover:underline disabled:text-secondary disabled:no-underline"
+                      className="text-body-sm font-semibold text-primary hover:underline disabled:text-secondary disabled:no-underline"
                     >
                       {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend code'}
                     </button>
@@ -455,7 +409,7 @@ export default function AuthPage() {
               )}
 
               {mode === MODE_FORGOT && (
-                <form onSubmit={handleForgot} className="space-y-3">
+                <form onSubmit={handleForgot} className="space-y-4">
                   <Field
                     label="Email address"
                     type="email"
@@ -482,17 +436,15 @@ export default function AuthPage() {
             {/* OAuth (hidden during OTP step) */}
             {mode !== MODE_VERIFY_OTP && (
               <>
-                <div className="mt-md flex items-center gap-3">
+                <div className="mt-6 flex items-center gap-3">
                   <div className="h-px flex-1 bg-outline-variant" />
-                  <span className="text-label-caps uppercase tracking-wider text-secondary">
-                    or
-                  </span>
+                  <span className="text-label-caps uppercase text-secondary">or</span>
                   <div className="h-px flex-1 bg-outline-variant" />
                 </div>
                 <button
                   type="button"
                   onClick={handleGoogle}
-                  className="mt-md flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md font-medium text-on-surface transition-colors hover:bg-surface-container"
+                  className="mt-6 flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md font-medium text-on-surface transition-colors hover:bg-surface-container"
                 >
                   <GoogleIcon />
                   Continue with Google
@@ -511,16 +463,16 @@ export default function AuthPage() {
 function Field({ label, type, value, onChange, autoComplete, required, hint }) {
   return (
     <label className="block">
-      <span className="text-body-sm font-medium text-on-surface-variant">{label}</span>
+      <span className="text-label-caps uppercase text-secondary">{label}</span>
       <input
         type={type}
         autoComplete={autoComplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="mt-1 block h-11 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-body-md text-on-surface outline-none transition-colors placeholder:text-outline focus:border-brand-blue"
+        className="mt-1.5 block h-11 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3.5 text-body-md text-on-surface outline-none transition-colors placeholder:text-outline focus:border-primary/70 focus:ring-2 focus:ring-primary/15"
       />
-      {hint && <p className="mt-1 text-body-sm text-on-surface-variant">{hint}</p>}
+      {hint && <p className="mt-1.5 text-body-sm text-on-surface-variant">{hint}</p>}
     </label>
   );
 }
@@ -530,7 +482,7 @@ function PrimaryButton({ loading, children }) {
     <button
       type="submit"
       disabled={loading}
-      className="brand-btn flex h-11 w-full items-center justify-center gap-2 rounded-lg text-body-md font-semibold disabled:opacity-70"
+      className="brand-btn flex h-11 w-full items-center justify-center gap-2 rounded-lg text-body-md"
     >
       {loading ? <Spinner size={18} color="#fff" /> : children}
     </button>

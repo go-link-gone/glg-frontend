@@ -22,6 +22,10 @@ function formatDate(iso) {
   }
 }
 
+function stripProtocol(url) {
+  return (url || '').replace(/^https?:\/\//, '');
+}
+
 export default function MyLinksPage() {
   const { pushToast } = useToast();
   const navigate = useNavigate();
@@ -87,46 +91,36 @@ export default function MyLinksPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <TopNav />
 
-      <main className="mx-auto w-full max-w-max-width flex-1 px-gutter py-margin md:py-xl">
-        <div className="mb-margin flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <main className="mx-auto w-full max-w-max-width flex-1 px-gutter py-margin md:py-lg">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-headline-lg-mobile font-semibold text-on-surface md:text-headline-lg">
+            <h1 className="text-headline-lg-mobile text-on-surface md:text-headline-lg">
               My Links
             </h1>
-            <p className="mt-1 text-body-md text-on-surface-variant">
-              {totalElements} link{totalElements === 1 ? '' : 's'} total — manage, copy, or dive into analytics.
+            <p className="mt-1.5 text-body-md text-on-surface-variant">
+              {totalElements} link{totalElements === 1 ? '' : 's'} — manage, copy, or dive into analytics.
             </p>
           </div>
           <Link
             to="/"
-            className="brand-btn inline-flex w-fit items-center gap-2 rounded-lg px-4 py-2 text-body-md font-semibold"
+            className="brand-btn inline-flex w-fit items-center gap-2 rounded-lg px-4 py-2.5 text-body-sm"
           >
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add_link</span>
-            Shorten a new URL
+            New short link
           </Link>
-        </div>
-
-        {/* List header (desktop) */}
-        <div className="hidden grid-cols-12 gap-4 border-b border-outline-variant px-4 py-2 text-label-caps uppercase text-secondary md:grid">
-          <div className="col-span-3">Short Link</div>
-          <div className="col-span-5">Original URL</div>
-          <div className="col-span-2">Created</div>
-          <div className="col-span-2 text-right">Actions</div>
         </div>
 
         {/* States */}
         {loading && !data && (
-          <div className="mt-6 grid place-items-center rounded-2xl border border-outline-variant bg-surface-container-lowest p-xl shadow-soft">
-            <Spinner size={24} color="#2563eb" label="Loading your links…" />
+          <div className="grid place-items-center rounded-2xl border border-outline-variant bg-surface-container-lowest p-xl shadow-soft">
+            <Spinner size={22} color="rgb(37 99 235)" label="Loading your links…" />
           </div>
         )}
 
-        {!loading && !error && items.length === 0 && (
-          <EmptyState />
-        )}
+        {!loading && !error && items.length === 0 && <EmptyState />}
 
         {error && !loading && (
-          <div className="mt-6 rounded-2xl border border-error/30 bg-error-container/40 p-md text-on-error-container">
+          <div className="rounded-2xl border border-error/30 bg-error-container/40 p-md text-on-error-container">
             <div className="flex items-center gap-2 font-semibold">
               <span className="material-symbols-outlined">error</span>
               Something went wrong
@@ -134,7 +128,7 @@ export default function MyLinksPage() {
             <p className="mt-1 text-body-sm">{error}</p>
             <button
               onClick={() => load(page, pageSize)}
-              className="mt-3 rounded-lg border border-error/30 bg-surface-container-lowest px-3 py-1.5 text-body-sm font-medium text-on-surface hover:bg-surface-container"
+              className="mt-3 rounded-lg border border-error/30 bg-surface-container-lowest px-3 py-1.5 text-body-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
             >
               Retry
             </button>
@@ -142,28 +136,38 @@ export default function MyLinksPage() {
         )}
 
         {items.length > 0 && (
-          <div className="mt-2 flex flex-col gap-2">
-            {items.map((l) => (
-              <LinkRow
-                key={l.shortKey}
-                link={l}
-                onCopy={() => copyShort(l.shortUrl)}
-                onAnalytics={() =>
-                  navigate(`/links/${encodeURIComponent(l.shortKey)}/analytics`, { state: { link: l } })
-                }
-                onDelete={() => setPendingDelete(l)}
-              />
-            ))}
+          <div className="overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-soft">
+            {/* Table header (desktop) */}
+            <div className="hidden grid-cols-12 gap-4 border-b border-outline-variant bg-surface-container-low px-5 py-3 text-label-caps uppercase text-secondary md:grid">
+              <div className="col-span-4">Short link</div>
+              <div className="col-span-4">Destination</div>
+              <div className="col-span-2">Created</div>
+              <div className="col-span-2 text-right">Actions</div>
+            </div>
+
+            <div className="divide-y divide-outline-variant">
+              {items.map((l) => (
+                <LinkRow
+                  key={l.shortKey}
+                  link={l}
+                  onCopy={() => copyShort(l.shortUrl)}
+                  onAnalytics={() =>
+                    navigate(`/links/${encodeURIComponent(l.shortKey)}/analytics`, { state: { link: l } })
+                  }
+                  onDelete={() => setPendingDelete(l)}
+                />
+              ))}
+            </div>
           </div>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-margin flex items-center justify-center gap-3">
+          <div className="mt-6 flex items-center justify-center gap-3">
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0 || loading}
-              className="grid h-9 w-9 place-items-center rounded-lg border border-outline-variant text-secondary transition-colors hover:bg-surface-container disabled:opacity-40"
+              className="grid h-9 w-9 place-items-center rounded-lg border border-outline-variant text-on-surface-variant transition-colors hover:text-on-surface disabled:opacity-40"
               aria-label="Previous page"
             >
               <span className="material-symbols-outlined">chevron_left</span>
@@ -174,7 +178,7 @@ export default function MyLinksPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1 || loading}
-              className="grid h-9 w-9 place-items-center rounded-lg border border-outline-variant text-secondary transition-colors hover:bg-surface-container disabled:opacity-40"
+              className="grid h-9 w-9 place-items-center rounded-lg border border-outline-variant text-on-surface-variant transition-colors hover:text-on-surface disabled:opacity-40"
               aria-label="Next page"
             >
               <span className="material-symbols-outlined">chevron_right</span>
@@ -192,19 +196,19 @@ export default function MyLinksPage() {
       >
         <div className="p-md">
           <div className="mb-md flex items-start gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-full bg-error-container text-error">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-error-container text-error">
               <span className="material-symbols-outlined">delete_forever</span>
             </div>
             <div className="flex-1">
-              <h3 id="delete-link-title" className="text-headline-md font-semibold text-on-surface">
+              <h3 id="delete-link-title" className="text-headline-md text-on-surface">
                 Delete this link?
               </h3>
               <p className="mt-1 text-body-sm text-on-surface-variant">
-                Data for this link will be lost. This action is permanent and cannot be undone.
+                Analytics for this link will be lost. This action is permanent and cannot be undone.
               </p>
               {pendingDelete && (
-                <div className="mt-3 rounded-lg border border-outline-variant bg-surface p-3 text-body-sm">
-                  <div className="font-mono text-primary">{pendingDelete.shortUrl}</div>
+                <div className="mt-3 rounded-lg border border-outline-variant bg-surface-container-low p-3 text-body-sm">
+                  <div className="font-mono font-medium text-primary">{stripProtocol(pendingDelete.shortUrl)}</div>
                   <div className="mt-1 truncate text-on-surface-variant" title={pendingDelete.originalUrl}>
                     {pendingDelete.originalUrl}
                   </div>
@@ -216,16 +220,16 @@ export default function MyLinksPage() {
             <button
               onClick={() => setPendingDelete(null)}
               disabled={deleting}
-              className="rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2 text-body-md font-medium text-on-surface hover:bg-surface-container disabled:opacity-50"
+              className="rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-2 text-body-md font-medium text-on-surface transition-colors hover:bg-surface-container disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="flex items-center justify-center gap-2 rounded-lg bg-error px-4 py-2 text-body-md font-semibold text-on-error hover:opacity-90 disabled:opacity-70"
+              className="flex items-center justify-center gap-2 rounded-lg bg-error px-4 py-2 text-body-md font-semibold text-on-error transition-opacity hover:opacity-90 disabled:opacity-70"
             >
-              {deleting ? <Spinner size={16} color="#fff" label="Deleting…" /> : 'Confirm'}
+              {deleting ? <Spinner size={16} color="#fff" label="Deleting…" /> : 'Delete link'}
             </button>
           </div>
         </div>
@@ -235,52 +239,63 @@ export default function MyLinksPage() {
 }
 
 function LinkRow({ link, onCopy, onAnalytics, onDelete }) {
+  const shortDisplay = stripProtocol(link.shortUrl);
   return (
-    <div className="grid grid-cols-1 items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-soft transition-shadow hover:shadow-md md:grid-cols-12">
-      <div className="flex min-w-0 flex-col md:col-span-3">
-        <span className="text-label-caps uppercase text-secondary md:hidden">Short Link</span>
+    <div className="grid grid-cols-1 gap-3 px-4 py-4 transition-colors hover:bg-surface-container-low md:grid-cols-12 md:items-center md:gap-4 md:px-5">
+      {/* Short link */}
+      <div className="flex min-w-0 items-center gap-2 md:col-span-4">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-outline-variant bg-surface-container text-on-surface-variant">
+          <span className="material-symbols-outlined" style={{ fontSize: 17 }}>link</span>
+        </span>
         <a
           href={link.shortUrl}
           target="_blank"
           rel="noreferrer"
-          className="truncate text-body-md font-semibold text-primary hover:underline"
+          className="truncate font-mono text-body-sm font-medium text-primary hover:underline"
           title={link.shortUrl}
         >
-          {link.shortUrl}
+          {shortDisplay}
         </a>
       </div>
-      <div className="flex min-w-0 flex-col md:col-span-5">
-        <span className="text-label-caps uppercase text-secondary md:hidden">Original URL</span>
+
+      {/* Destination */}
+      <div className="flex min-w-0 flex-col md:col-span-4">
+        <span className="text-label-caps uppercase text-secondary md:hidden">Destination</span>
         <span className="truncate text-body-sm text-on-surface-variant" title={link.originalUrl}>
           {link.originalUrl}
         </span>
       </div>
-      <div className="flex flex-col md:col-span-2">
+
+      {/* Created */}
+      <div className="flex items-center gap-2 md:col-span-2">
         <span className="text-label-caps uppercase text-secondary md:hidden">Created</span>
-        <span className="text-body-sm text-secondary">{formatDate(link.createdAt)}</span>
+        <span className="text-body-sm text-on-surface-variant">{formatDate(link.createdAt)}</span>
       </div>
-      <div className="flex flex-wrap items-center justify-end gap-2 md:col-span-2">
+
+      {/* Actions */}
+      <div className="mt-1 flex items-center gap-1.5 md:col-span-2 md:mt-0 md:justify-end">
         <button
           onClick={onCopy}
           aria-label="Copy short URL"
-          className="grid h-9 w-9 place-items-center rounded-lg border border-outline-variant text-secondary transition-colors hover:bg-surface-container hover:text-primary"
+          className="grid h-9 w-9 place-items-center rounded-lg border border-outline-variant text-on-surface-variant transition-colors hover:border-outline hover:text-on-surface"
           title="Copy"
         >
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>content_copy</span>
         </button>
         <button
           onClick={onAnalytics}
-          className="inline-flex items-center gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 text-body-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 text-body-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
         >
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>bar_chart</span>
           Analytics
         </button>
         <button
           onClick={onDelete}
-          className="inline-flex items-center gap-1 rounded-lg border border-error/30 px-3 py-1.5 text-body-sm font-semibold text-error transition-colors hover:bg-error-container/60"
+          aria-label="Delete link"
+          className="grid h-9 w-9 place-items-center rounded-lg border border-outline-variant text-on-surface-variant transition-colors hover:border-error/40 hover:bg-error-container/40 hover:text-error"
+          title="Delete"
         >
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>
-          Delete
         </button>
       </div>
     </div>
@@ -289,17 +304,17 @@ function LinkRow({ link, onCopy, onAnalytics, onDelete }) {
 
 function EmptyState() {
   return (
-    <div className="mt-6 rounded-2xl border border-dashed border-outline-variant bg-surface-container-lowest p-xl text-center shadow-soft">
-      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-secondary-container text-primary">
+    <div className="rounded-2xl border border-dashed border-outline-variant bg-surface-container-lowest p-xl text-center">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl border border-outline-variant bg-surface-container text-on-surface-variant">
         <span className="material-symbols-outlined">link_off</span>
       </div>
-      <h3 className="mt-3 text-headline-md font-semibold text-on-surface">No links yet</h3>
-      <p className="mt-1 text-body-sm text-on-surface-variant">
-        Shorten your first URL to start tracking clicks and visitors.
+      <h3 className="mt-4 text-headline-md text-on-surface">No links yet</h3>
+      <p className="mx-auto mt-1.5 max-w-sm text-body-sm text-on-surface-variant">
+        Shorten your first URL to start tracking clicks, visitors, and locations.
       </p>
       <Link
         to="/"
-        className="brand-btn mt-md inline-flex items-center gap-2 rounded-lg px-4 py-2 text-body-md font-semibold"
+        className="brand-btn mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-body-sm"
       >
         <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add_link</span>
         Create short link

@@ -1,20 +1,21 @@
 import { Link } from 'react-router-dom';
 
 /**
- * GoLinkGone brand lockup: square logo tile + "Go[Link]Gone" wordmark.
- * The middle "Link" word uses the cyan→blue→purple brand gradient (matches the banner).
+ * GoLinkGone brand lockup: logo tile + "Go[Link]Gone" wordmark.
+ * The middle "Link" word carries the cyan→blue→violet brand gradient — the
+ * one place (besides the logo) where the full gradient is allowed to appear.
  */
 export default function BrandMark({
   to = '/',
-  size = 36,
+  size = 30,
   showWordmark = true,
   className = '',
-  wordmarkClass = 'text-headline-md',
+  wordmarkClass = 'text-[19px]',
 }) {
   const inner = (
-    <span className={`flex items-center gap-3 ${className}`}>
+    <span className={`flex items-center gap-2.5 ${className}`}>
       <span
-        className="relative inline-grid place-items-center overflow-hidden rounded-xl shadow-glow-sm ring-1 ring-brand-blue/30"
+        className="relative inline-grid shrink-0 place-items-center overflow-hidden rounded-[10px] ring-1 ring-inset ring-white/10"
         style={{ width: size, height: size, background: '#0a1428' }}
       >
         <img
@@ -25,7 +26,9 @@ export default function BrandMark({
         />
       </span>
       {showWordmark && (
-        <span className={`font-extrabold tracking-tight text-on-surface ${wordmarkClass}`}>
+        <span
+          className={`font-bold tracking-[-0.02em] text-on-surface ${wordmarkClass}`}
+        >
           Go<span className="brand-text">Link</span>Gone
         </span>
       )}

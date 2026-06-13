@@ -34,40 +34,17 @@ export default class ErrorBoundary extends Component {
     if (!error) return this.props.children;
 
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-gutter py-margin">
-        <div
-          aria-hidden
-          className="brand-blob animate-float-slow"
-          style={{
-            width: 480,
-            height: 480,
-            left: -120,
-            top: -80,
-            background: 'radial-gradient(circle, rgb(var(--c-brand-cyan) / 0.45), transparent 60%)',
-          }}
-        />
-        <div
-          aria-hidden
-          className="brand-blob animate-float-slower"
-          style={{
-            width: 520,
-            height: 520,
-            right: -180,
-            bottom: -120,
-            background: 'radial-gradient(circle, rgb(var(--c-brand-purple) / 0.4), transparent 60%)',
-          }}
-        />
-
-        <div className="brand-border relative z-10 w-full max-w-lg rounded-2xl bg-surface-container-lowest/85 p-lg shadow-elevated backdrop-blur-xl">
-          <div className="mb-md flex items-center justify-between">
-            <BrandMark to={null} size={44} />
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-background px-gutter py-margin">
+        <div className="relative z-10 w-full max-w-lg rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-elevated md:p-8">
+          <div className="mb-6">
+            <BrandMark to={null} size={30} />
           </div>
           <div className="flex items-start gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-full bg-error-container text-error">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-error-container text-error">
               <span className="material-symbols-outlined">bug_report</span>
             </div>
             <div className="flex-1">
-              <h1 className="text-headline-md font-semibold text-on-surface">
+              <h1 className="text-headline-md text-on-surface">
                 Something just went sideways.
               </h1>
               <p className="mt-1 text-body-sm text-on-surface-variant">

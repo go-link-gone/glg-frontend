@@ -20,7 +20,7 @@ export default function Modal({ open, onClose, children, labelledBy }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-on-surface/40 p-4 backdrop-blur-[2px]"
+      className="animate-fade-in fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose?.();
       }}
@@ -28,7 +28,7 @@ export default function Modal({ open, onClose, children, labelledBy }) {
       aria-modal="true"
       aria-labelledby={labelledBy}
     >
-      <div className="my-auto w-full max-w-md rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-elevated">
+      <div className="animate-scale-in my-auto w-full max-w-md rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-elevated">
         {children}
       </div>
     </div>,

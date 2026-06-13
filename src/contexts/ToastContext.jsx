@@ -4,6 +4,24 @@ const ToastContext = createContext({ pushToast: () => {} });
 
 let id = 0;
 
+const TONE = {
+  success: {
+    icon: 'check_circle',
+    accent: 'rgb(var(--c-success))',
+    iconClass: 'text-success',
+  },
+  error: {
+    icon: 'error',
+    accent: 'rgb(var(--c-error))',
+    iconClass: 'text-error',
+  },
+  info: {
+    icon: 'info',
+    accent: 'rgb(var(--c-primary))',
+    iconClass: 'text-primary',
+  },
+};
+
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
@@ -20,30 +38,30 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ pushToast }}>
       {children}
-      <div className="fixed top-5 right-5 z-[100] flex flex-col gap-2 w-[min(360px,calc(100vw-2rem))]">
+      <div className="fixed top-4 right-4 z-[100] flex w-[min(380px,calc(100vw-2rem))] flex-col gap-2.5">
         {toasts.map((t) => {
-          const styles =
-            t.type === 'error'
-              ? 'bg-error-container border-error/30 text-on-error-container'
-              : t.type === 'success'
-              ? 'bg-[#D1FAE5] border-[#A7F3D0] text-[#065F46]'
-              : 'bg-surface-container-lowest border-outline-variant text-on-surface';
-          const icon =
-            t.type === 'error' ? 'error' : t.type === 'success' ? 'check_circle' : 'info';
+          const tone = TONE[t.type] ?? TONE.info;
           return (
             <div
               key={t.id}
-              className={`toast-enter pointer-events-auto flex items-start gap-3 rounded-lg border px-4 py-3 shadow-elevated ${styles}`}
+              className="toast-enter pointer-events-auto relative flex items-start gap-3 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest py-3 pl-4 pr-3 shadow-elevated"
             >
-              <span className="material-symbols-outlined mt-0.5">{icon}</span>
-              <div className="flex-1 text-body-sm leading-snug">
+              <span
+                aria-hidden
+                className="absolute inset-y-0 left-0 w-1"
+                style={{ background: tone.accent }}
+              />
+              <span className={`material-symbols-outlined mt-0.5 ${tone.iconClass}`} style={{ fontSize: 20 }}>
+                {tone.icon}
+              </span>
+              <div className="flex-1 text-body-sm leading-snug text-on-surface">
                 {t.title && <div className="font-semibold">{t.title}</div>}
-                {t.message && <div className="opacity-90">{t.message}</div>}
+                {t.message && <div className="mt-0.5 text-on-surface-variant">{t.message}</div>}
               </div>
               <button
                 aria-label="Dismiss"
                 onClick={() => remove(t.id)}
-                className="text-current opacity-60 hover:opacity-100"
+                className="-mr-1 grid h-6 w-6 shrink-0 place-items-center rounded-md text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
                   close

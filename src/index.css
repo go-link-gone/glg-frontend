@@ -2,127 +2,132 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light theme (default) */
+/* ============================================================
+   GoLinkGone design system
+   Quiet, near-monochrome surfaces + one confident blue accent.
+   The cyan→blue→violet brand gradient is a rare signature
+   (logo + wordmark), never wallpaper. Type and spacing do the work.
+   All color tokens are RGB triplets so Tailwind can apply <alpha-value>.
+   ============================================================ */
+
 :root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
   color-scheme: light;
 
-  --c-background: 247 249 251;
-  --c-surface: 247 249 251;
-  --c-surface-bright: 247 249 251;
-  --c-surface-dim: 216 218 220;
-  --c-surface-variant: 224 227 229;
+  /* ---- Light: clean, slightly cool, near-white ---- */
+  --c-background: 249 250 251;
+  --c-surface: 249 250 251;
+  --c-surface-bright: 255 255 255;
+  --c-surface-dim: 226 232 240;
+  --c-surface-variant: 226 232 240;
   --c-surface-container-lowest: 255 255 255;
-  --c-surface-container-low: 242 244 246;
-  --c-surface-container: 236 238 240;
-  --c-surface-container-high: 230 232 234;
-  --c-surface-container-highest: 224 227 229;
-  --c-surface-tint: 0 83 219;
+  --c-surface-container-low: 246 248 250;
+  --c-surface-container: 241 244 247;
+  --c-surface-container-high: 234 238 242;
+  --c-surface-container-highest: 226 231 237;
+  --c-surface-tint: 37 99 235;
 
-  --c-on-surface: 25 28 30;
-  --c-on-surface-variant: 67 70 85;
-  --c-on-background: 25 28 30;
+  --c-on-surface: 15 23 42;
+  --c-on-surface-variant: 71 85 105;
+  --c-on-background: 15 23 42;
 
-  --c-outline: 115 118 134;
-  --c-outline-variant: 195 198 215;
+  --c-outline: 148 163 184;
+  --c-outline-variant: 226 232 240;
 
-  --c-primary: 0 74 198;
+  --c-primary: 37 99 235;
   --c-primary-container: 37 99 235;
   --c-on-primary: 255 255 255;
-  --c-on-primary-container: 238 239 255;
-  --c-inverse-primary: 180 197 255;
+  --c-on-primary-container: 235 240 255;
+  --c-inverse-primary: 147 197 253;
 
-  --c-secondary: 80 95 118;
-  --c-secondary-container: 208 225 251;
+  --c-secondary: 100 116 139;
+  --c-secondary-container: 226 232 240;
   --c-on-secondary: 255 255 255;
-  --c-on-secondary-container: 84 100 122;
+  --c-on-secondary-container: 51 65 105;
 
-  --c-tertiary: 0 98 66;
-  --c-tertiary-container: 0 125 85;
+  --c-tertiary: 13 148 136;
+  --c-tertiary-container: 15 118 110;
   --c-on-tertiary: 255 255 255;
-  --c-on-tertiary-container: 189 255 219;
+  --c-on-tertiary-container: 204 251 241;
 
-  --c-error: 186 26 26;
-  --c-error-container: 255 218 214;
+  --c-error: 220 38 38;
+  --c-error-container: 254 226 226;
   --c-on-error: 255 255 255;
-  --c-on-error-container: 147 0 10;
+  --c-on-error-container: 153 27 27;
 
-  --c-success: 16 185 129;
+  --c-success: 22 163 74;
 
-  --c-inverse-surface: 45 49 51;
-  --c-inverse-on-surface: 239 241 243;
+  --c-inverse-surface: 30 37 56;
+  --c-inverse-on-surface: 240 244 250;
 
-  /* GoLinkGone brand accents */
-  --c-brand-cyan: 0 212 255;
-  --c-brand-blue: 42 76 255;
-  --c-brand-purple: 140 0 255;
+  /* Brand gradient stops (signature use only) */
+  --c-brand-cyan: 6 182 212;
+  --c-brand-blue: 37 99 235;
+  --c-brand-purple: 124 58 237;
   --c-brand-ink: 10 20 40;
 
-  /* Auth-page decorative grid line color */
-  --c-grid-line: 195 198 215;
+  --c-grid-line: 203 213 225;
 }
 
-/* Dark theme */
+/* ---- Dark: deep, slightly-cool charcoal (Linear/Vercel-grade, not navy theatrics) ---- */
 .dark {
   color-scheme: dark;
 
-  --c-background: 15 20 25;
-  --c-surface: 15 20 25;
-  --c-surface-bright: 53 58 62;
-  --c-surface-dim: 10 15 20;
-  --c-surface-variant: 67 71 78;
-  --c-surface-container-lowest: 10 14 18;
-  --c-surface-container-low: 24 28 31;
-  --c-surface-container: 28 32 36;
-  --c-surface-container-high: 38 41 45;
-  --c-surface-container-highest: 49 52 56;
-  --c-surface-tint: 180 197 255;
+  --c-background: 9 11 16;
+  --c-surface: 9 11 16;
+  --c-surface-bright: 30 35 45;
+  --c-surface-dim: 5 6 10;
+  --c-surface-variant: 30 35 45;
+  --c-surface-container-lowest: 14 17 23;
+  --c-surface-container-low: 18 21 28;
+  --c-surface-container: 22 26 34;
+  --c-surface-container-high: 29 34 44;
+  --c-surface-container-highest: 37 43 55;
+  --c-surface-tint: 96 165 250;
 
-  --c-on-surface: 225 227 229;
-  --c-on-surface-variant: 195 198 201;
-  --c-on-background: 225 227 229;
+  --c-on-surface: 233 236 242;
+  --c-on-surface-variant: 148 160 178;
+  --c-on-background: 233 236 242;
 
-  --c-outline: 141 145 153;
-  --c-outline-variant: 67 71 78;
+  --c-outline: 90 100 118;
+  --c-outline-variant: 35 41 52;
 
-  --c-primary: 180 197 255;
-  --c-primary-container: 0 60 158;
-  --c-on-primary: 0 35 110;
-  --c-on-primary-container: 220 226 255;
-  --c-inverse-primary: 0 74 198;
+  --c-primary: 96 165 250;
+  --c-primary-container: 59 130 246;
+  --c-on-primary: 8 20 45;
+  --c-on-primary-container: 219 234 254;
+  --c-inverse-primary: 37 99 235;
 
-  --c-secondary: 183 200 225;
-  --c-secondary-container: 56 72 93;
-  --c-on-secondary: 33 49 71;
-  --c-on-secondary-container: 211 228 254;
+  --c-secondary: 138 150 170;
+  --c-secondary-container: 33 40 52;
+  --c-on-secondary: 233 236 242;
+  --c-on-secondary-container: 203 213 225;
 
-  --c-tertiary: 78 222 163;
-  --c-tertiary-container: 0 81 58;
-  --c-on-tertiary: 0 57 34;
-  --c-on-tertiary-container: 111 251 190;
+  --c-tertiary: 45 212 191;
+  --c-tertiary-container: 19 78 74;
+  --c-on-tertiary: 2 30 26;
+  --c-on-tertiary-container: 153 246 228;
 
-  --c-error: 255 180 171;
-  --c-error-container: 147 0 10;
-  --c-on-error: 105 0 5;
-  --c-on-error-container: 255 218 214;
+  --c-error: 248 113 113;
+  --c-error-container: 68 18 18;
+  --c-on-error: 50 8 8;
+  --c-on-error-container: 254 202 202;
 
-  --c-success: 52 211 153;
+  --c-success: 74 222 128;
 
-  --c-inverse-surface: 225 227 229;
-  --c-inverse-on-surface: 45 49 51;
+  --c-inverse-surface: 233 236 242;
+  --c-inverse-on-surface: 22 26 34;
 
-  /* Brand accents stay vibrant in dark mode */
-  --c-brand-cyan: 56 224 255;
-  --c-brand-blue: 92 122 255;
-  --c-brand-purple: 168 80 255;
+  --c-brand-cyan: 34 211 238;
+  --c-brand-blue: 96 165 250;
+  --c-brand-purple: 167 139 250;
   --c-brand-ink: 5 10 24;
 
-  --c-grid-line: 67 71 78;
+  --c-grid-line: 38 44 56;
 }
 
 html,
@@ -135,7 +140,36 @@ body {
   margin: 0;
   background-color: rgb(var(--c-background));
   color: rgb(var(--c-on-background));
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Brand-tinted text selection */
+::selection {
+  background: rgb(var(--c-primary) / 0.22);
+  color: rgb(var(--c-on-surface));
+}
+
+/* Refined scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--c-outline) / 0.5) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgb(var(--c-outline) / 0.4);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--c-outline) / 0.65);
+  background-clip: padding-box;
 }
 
 .material-symbols-outlined {
@@ -155,50 +189,7 @@ body {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* Supabase Auth UI overrides — themed via CSS variables so dark mode flips automatically */
-.supabase-auth-ui_ui-button {
-  border-radius: 0.5rem !important;
-  font-weight: 600 !important;
-  height: 44px !important;
-  font-family: 'Inter', sans-serif !important;
-  transition: opacity 0.15s ease, transform 0.15s ease !important;
-}
-.supabase-auth-ui_ui-button:hover {
-  opacity: 0.92 !important;
-}
-.supabase-auth-ui_ui-input {
-  border-radius: 0.5rem !important;
-  height: 44px !important;
-  font-family: 'Inter', sans-serif !important;
-  border-color: rgb(var(--c-outline-variant)) !important;
-  background-color: rgb(var(--c-surface-container-lowest)) !important;
-  color: rgb(var(--c-on-surface)) !important;
-}
-.supabase-auth-ui_ui-input:focus {
-  outline: none !important;
-  border-color: rgb(var(--c-primary-container)) !important;
-  box-shadow: 0 0 0 3px rgb(var(--c-primary-container) / 0.15) !important;
-}
-.supabase-auth-ui_ui-label {
-  font-size: 12px !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
-  font-weight: 600 !important;
-  color: rgb(var(--c-secondary)) !important;
-}
-.supabase-auth-ui_ui-anchor {
-  color: rgb(var(--c-primary-container)) !important;
-  font-weight: 500 !important;
-}
-.supabase-auth-ui_ui-divider {
-  background-color: rgb(var(--c-outline-variant)) !important;
-}
-.supabase-auth-ui_ui-message {
-  border-radius: 0.5rem !important;
-  font-family: 'Inter', sans-serif !important;
-}
-
-/* Spinner */
+/* ---------- Spinner ---------- */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -206,21 +197,25 @@ body {
   animation: spin 0.7s linear infinite;
 }
 
-/* Toast slide-in */
+/* ---------- Toast slide-in ---------- */
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateX(14px) scale(0.99); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
 }
 .toast-enter {
-  animation: toast-in 0.18s ease-out;
+  animation: toast-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ---------- GoLinkGone brand utilities ---------- */
+/* ============================================================
+   Brand signature — used sparingly (logo, wordmark, key accents)
+   ============================================================ */
+
+/* Gradient wordmark / inline brand text */
 .brand-text {
   background: linear-gradient(
-    90deg,
+    100deg,
     rgb(var(--c-brand-cyan)) 0%,
-    rgb(var(--c-brand-blue)) 55%,
+    rgb(var(--c-brand-blue)) 50%,
     rgb(var(--c-brand-purple)) 100%
   );
   -webkit-background-clip: text;
@@ -228,33 +223,34 @@ body {
   color: transparent;
 }
 
+/* Primary action — solid, confident accent (not a rainbow). Crisp, physical. */
 .brand-btn {
   position: relative;
-  background: linear-gradient(
-    135deg,
-    rgb(var(--c-brand-cyan)) 0%,
-    rgb(var(--c-brand-blue)) 60%,
-    rgb(var(--c-brand-purple)) 100%
-  );
-  background-size: 200% 200%;
-  color: #ffffff;
-  transition: background-position 0.4s ease, transform 0.15s ease, box-shadow 0.2s ease;
-  box-shadow: 0 10px 30px -10px rgba(42, 76, 255, 0.55), 0 4px 14px -6px rgba(0, 212, 255, 0.45);
+  background-color: rgb(var(--c-primary));
+  color: rgb(var(--c-on-primary));
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.16), inset 0 1px 0 rgb(255 255 255 / 0.14);
+  transition: background-color 0.15s ease, box-shadow 0.2s ease, transform 0.12s ease, opacity 0.15s ease;
 }
 .brand-btn:hover {
-  background-position: 100% 100%;
-  transform: translateY(-1px);
+  background-color: rgb(var(--c-primary) / 0.9);
+  box-shadow: 0 2px 8px -1px rgb(var(--c-primary) / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.14);
 }
 .brand-btn:active {
-  transform: translateY(0);
+  transform: translateY(0.5px);
 }
 .brand-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
+}
+.brand-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(var(--c-surface-container-lowest)), 0 0 0 4px rgb(var(--c-primary) / 0.55);
 }
 
-/* Gradient border via masked overlay — used on cards and the URL input */
+/* Hairline gradient border (used once or twice as a quiet signature) */
 .brand-border {
   position: relative;
 }
@@ -266,9 +262,9 @@ body {
   border-radius: inherit;
   background: linear-gradient(
     135deg,
-    rgb(var(--c-brand-cyan) / 0.7),
-    rgb(var(--c-brand-blue) / 0.7),
-    rgb(var(--c-brand-purple) / 0.7)
+    rgb(var(--c-brand-cyan) / 0.55),
+    rgb(var(--c-brand-blue) / 0.4) 50%,
+    rgb(var(--c-brand-purple) / 0.55)
   );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
@@ -276,38 +272,37 @@ body {
   pointer-events: none;
 }
 
-/* Soft ambient color blob behind hero sections */
-.brand-blob {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(80px);
-  opacity: 0.55;
-  pointer-events: none;
-}
-.dark .brand-blob {
-  opacity: 0.42;
+/* Quiet focus ring for inputs/containers */
+.focus-ring:focus-within {
+  border-color: rgb(var(--c-primary) / 0.7);
+  box-shadow: 0 0 0 3px rgb(var(--c-primary) / 0.14);
 }
 
-/* Subtle moving sheen across hero headline */
-.brand-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgb(var(--c-brand-cyan)) 0%,
-    rgb(var(--c-brand-blue)) 35%,
-    rgb(var(--c-brand-purple)) 60%,
-    rgb(var(--c-brand-blue)) 85%,
-    rgb(var(--c-brand-cyan)) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 6s linear infinite;
+/* Subtle dot field — hero / auth only, always heavily masked */
+.dot-field {
+  background-image: radial-gradient(rgb(var(--c-grid-line)) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* Brand-colored ring used on focus */
-.brand-ring:focus-within {
-  box-shadow:
-    0 0 0 1px rgb(var(--c-brand-blue) / 0.5),
-    0 0 0 4px rgb(var(--c-brand-cyan) / 0.18);
+/* Card hover: border + lift, no glow */
+.card-lift {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Tabular numerals for stats / data / codes */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

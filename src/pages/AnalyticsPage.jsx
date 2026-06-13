@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
+  Area,
   CartesianGrid,
   Cell,
-  Legend,
+  ComposedChart,
   Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -21,24 +21,32 @@ import { useToast } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 // Theme-aware palette for Recharts (it can't read CSS vars directly).
-const CHART_THEME = {
+const PALETTE = {
   light: {
-    grid: '#e6e8ea',
-    axis: '#737686',
-    axisText: '#505f76',
+    grid: '#e9eef4',
+    axisText: '#64748b',
     tooltipBg: '#ffffff',
-    tooltipBorder: '#c3c6d7',
-    tooltipText: '#191c1e',
+    tooltipBorder: '#e2e8f0',
+    tooltipText: '#0f172a',
     pieStroke: '#ffffff',
+    track: '#eef2f7',
+    total: '#2563eb',
+    newVisitors: '#64748b',
+    uniqueVisitors: '#0d9488',
+    device: { PHONE: '#2563eb', DESKTOP: '#7c3aed', TABLET: '#0d9488', UNKNOWN: '#94a3b8' },
   },
   dark: {
-    grid: '#26292d',
-    axis: '#8d9199',
-    axisText: '#c3c6c9',
-    tooltipBg: '#181c1f',
-    tooltipBorder: '#43474e',
-    tooltipText: '#e1e3e5',
-    pieStroke: '#0f1419',
+    grid: '#222836',
+    axisText: '#8a94a6',
+    tooltipBg: '#161a22',
+    tooltipBorder: '#2a3140',
+    tooltipText: '#e9ecf2',
+    pieStroke: '#0e1117',
+    track: '#1b212b',
+    total: '#60a5fa',
+    newVisitors: '#94a3b8',
+    uniqueVisitors: '#2dd4bf',
+    device: { PHONE: '#60a5fa', DESKTOP: '#a78bfa', TABLET: '#2dd4bf', UNKNOWN: '#64748b' },
   },
 };
 
@@ -73,20 +81,13 @@ function resolveUserTz() {
   }
 }
 
-const DEVICE_COLORS = {
-  PHONE: '#2563eb',
-  TABLET: '#10B981',
-  DESKTOP: '#004ac6',
-  UNKNOWN: '#737686',
-};
-
 // Backend buckets in the user's timezone and emits ISO strings with `Z` whose digits
 // match wall-clock-in-tz. Parsing as UTC and formatting with `timeZone: 'UTC'` below
 // reproduces the user's local label without further conversion.
 //
 // `uniqueVisitors` is COUNT(DISTINCT visitor_hash) for the bucket on dynamic
 // ranges, and null on the All-Time monthly view (link_stats_monthly doesn't
-// carry distinct-hash data). The Unique Visitors <Line> is conditionally
+// carry distinct-hash data). The Unique Visitors series is conditionally
 // rendered for that reason — no in-data fallback needed.
 function toSeries(totals) {
   if (!Array.isArray(totals)) return [];
@@ -99,14 +100,6 @@ function toSeries(totals) {
       uniqueVisitors: p.uniqueVisitors != null ? Number(p.uniqueVisitors) : null,
     }));
 }
-
-// Per-metric chart colors — shared by the Line stroke, the legend dot, and the
-// tooltip dot so the visual mapping is unambiguous everywhere.
-const METRIC_COLORS = {
-  total:           '#2563eb', // blue
-  newVisitors:     '#10B981', // green
-  uniqueVisitors:  '#8b5cf6', // violet
-};
 
 // Browser-native ISO alpha-2 → full country name. Falls back to the raw code
 // for anything Intl can't resolve (e.g. our "UNKNOWN" sentinel from MaxMind).
@@ -178,7 +171,7 @@ export default function AnalyticsPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [copied, setCopied] = useState(false);
   const { theme } = useTheme();
-  const chartC = CHART_THEME[theme === 'dark' ? 'dark' : 'light'];
+  const p = PALETTE[theme === 'dark' ? 'dark' : 'light'];
   const userTz = useMemo(resolveUserTz, []);
 
   useEffect(() => {
@@ -221,7 +214,7 @@ export default function AnalyticsPage() {
   const totalClicks = data?.totalClicks ?? 0;
   const newVisitors = data?.newVisitors ?? 0;
   const isAllTime = timeRange === 'all';
-  // Unique Visitors line is hidden on the All-Time monthly view — the backing
+  // Unique Visitors series is hidden on the All-Time monthly view — the backing
   // table (link_stats_monthly) holds no per-month distinct-hash data.
   const showUnique = !isAllTime;
   const link = state?.link;
@@ -242,11 +235,11 @@ export default function AnalyticsPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <TopNav />
 
-      <main className="mx-auto w-full max-w-max-width flex-1 px-gutter py-margin md:py-xl">
+      <main className="mx-auto w-full max-w-max-width flex-1 px-gutter py-margin md:py-lg">
         {/* Header */}
         <button
           onClick={() => navigate('/links')}
-          className="mb-md inline-flex items-center gap-1 text-body-sm text-secondary hover:text-primary"
+          className="mb-5 inline-flex items-center gap-1 text-body-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface"
         >
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
             arrow_back
@@ -254,16 +247,16 @@ export default function AnalyticsPage() {
           Back to My Links
         </button>
 
-        <div className="flex flex-col gap-md md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <div className="text-label-caps uppercase text-secondary">Link Analytics</div>
-            <div className="mt-1 flex items-center gap-2">
-              <h1 className="min-w-0 truncate text-headline-lg-mobile font-semibold md:text-headline-lg">
+            <div className="text-label-caps uppercase text-secondary">Link analytics</div>
+            <div className="mt-1.5 flex items-center gap-2">
+              <h1 className="min-w-0 truncate text-headline-lg-mobile md:text-headline-lg">
                 <a
                   href={shortUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="brand-text hover:underline"
+                  className="font-mono font-bold text-primary hover:underline"
                   title={shortUrl}
                 >
                   {displayShortUrl}
@@ -273,21 +266,20 @@ export default function AnalyticsPage() {
                 type="button"
                 onClick={copyShortUrl}
                 aria-label="Copy short link"
-                className="flex flex-shrink-0 items-center gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 text-body-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-outline-variant text-on-surface-variant transition-colors hover:border-outline hover:text-on-surface"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
                   {copied ? 'check' : 'content_copy'}
                 </span>
-                {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
             {link?.originalUrl && (
-              <p className="mt-1 truncate text-body-sm text-on-surface-variant" title={link.originalUrl}>
+              <p className="mt-1.5 truncate text-body-sm text-on-surface-variant" title={link.originalUrl}>
                 Redirects to {link.originalUrl}
               </p>
             )}
           </div>
-          <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center md:flex-wrap">
+          <div className="flex w-full flex-col gap-2 lg:w-auto lg:flex-row lg:items-center">
             <SegmentedControl
               options={TIME_RANGES}
               value={timeRange}
@@ -304,11 +296,11 @@ export default function AnalyticsPage() {
         </div>
 
         {loading && !data ? (
-          <div className="mt-margin grid place-items-center rounded-2xl border border-outline-variant bg-surface-container-lowest p-xl shadow-soft">
-            <Spinner size={24} color="#2563eb" label="Loading analytics…" />
+          <div className="mt-6 grid place-items-center rounded-2xl border border-outline-variant bg-surface-container-lowest p-xl shadow-soft">
+            <Spinner size={22} color="rgb(37 99 235)" label="Loading analytics…" />
           </div>
         ) : error ? (
-          <div className="mt-margin rounded-2xl border border-error/30 bg-error-container/40 p-md text-on-error-container">
+          <div className="mt-6 rounded-2xl border border-error/30 bg-error-container/40 p-md text-on-error-container">
             <div className="flex items-center gap-2 font-semibold">
               <span className="material-symbols-outlined">error</span>
               Could not load analytics
@@ -317,39 +309,39 @@ export default function AnalyticsPage() {
             <div className="mt-3 flex gap-2">
               <button
                 onClick={() => setRefreshKey((k) => k + 1)}
-                className="rounded-lg border border-error/30 bg-surface-container-lowest px-3 py-1.5 text-body-sm font-medium text-on-surface hover:bg-surface-container"
+                className="rounded-lg border border-error/30 bg-surface-container-lowest px-3 py-1.5 text-body-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
               >
                 Retry
               </button>
               <Link
                 to="/links"
-                className="rounded-lg px-3 py-1.5 text-body-sm font-medium text-secondary hover:text-primary"
+                className="rounded-lg px-3 py-1.5 text-body-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface"
               >
                 Back to My Links
               </Link>
             </div>
           </div>
         ) : (
-          <div className="mt-md grid grid-cols-1 gap-md md:grid-cols-12 md:items-start">
-            <SummaryCard
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-12 md:items-start">
+            <Stat
               className="md:col-span-6"
-              label="Total Clicks"
+              label="Total clicks"
               value={totalClicks}
-              accent="text-primary-container"
               icon="ads_click"
+              tone={p.total}
             />
-            <SummaryCard
+            <Stat
               className="md:col-span-6"
-              label="New Visitors"
+              label="New visitors"
               value={newVisitors}
-              accent="text-tertiary-container"
-              icon="group"
+              icon="person_add"
+              tone={p.uniqueVisitors}
             />
 
             <Card className="md:col-span-12">
-              <CardHeader title="Traffic Overview">
-                <div className="flex items-center gap-md">
-                  <Legend2 showUnique={showUnique} />
+              <CardHeader title="Traffic overview" subtitle="Clicks and visitors over the selected range">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Legend showUnique={showUnique} p={p} />
                   <TimezoneBadge tz={userTz} />
                 </div>
               </CardHeader>
@@ -358,79 +350,89 @@ export default function AnalyticsPage() {
                   <EmptyChart message="No clicks yet for this range." />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={series} margin={{ top: 10, right: 12, bottom: 0, left: 0 }}>
-                      <CartesianGrid stroke={chartC.grid} vertical={false} />
+                    <ComposedChart data={series} margin={{ top: 12, right: 8, bottom: 0, left: -12 }}>
+                      <defs>
+                        <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={p.total} stopOpacity={0.2} />
+                          <stop offset="100%" stopColor={p.total} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid stroke={p.grid} vertical={false} />
                       <XAxis
                         dataKey="ts"
-                        stroke={chartC.axis}
-                        tick={{ fontSize: 12, fill: chartC.axisText }}
+                        stroke={p.grid}
+                        tick={{ fontSize: 12, fill: p.axisText }}
                         tickFormatter={(v) => formatTick(v, granularity)}
                         tickLine={false}
-                        axisLine={{ stroke: chartC.grid }}
+                        axisLine={{ stroke: p.grid }}
+                        dy={6}
+                        minTickGap={24}
                       />
                       <YAxis
-                        stroke={chartC.axis}
-                        tick={{ fontSize: 12, fill: chartC.axisText }}
+                        stroke={p.grid}
+                        tick={{ fontSize: 12, fill: p.axisText }}
                         tickLine={false}
-                        axisLine={{ stroke: chartC.grid }}
+                        axisLine={false}
                         allowDecimals={false}
-                        width={36}
+                        width={44}
                       />
                       <Tooltip
-                        content={<MetricTooltip granularity={granularity} chartC={chartC} />}
+                        cursor={{ stroke: p.axisText, strokeOpacity: 0.25, strokeWidth: 1 }}
+                        content={<MetricTooltip granularity={granularity} p={p} />}
                       />
-                      <Line
+                      <Area
                         type="monotone"
                         dataKey="total"
-                        name="Total Clicks"
-                        stroke={METRIC_COLORS.total}
-                        strokeWidth={2.25}
-                        dot={{ r: 3, fill: METRIC_COLORS.total, stroke: '#fff', strokeWidth: 1.5 }}
-                        activeDot={{ r: 5 }}
+                        name="Total clicks"
+                        stroke={p.total}
+                        strokeWidth={2.5}
+                        fill="url(#fillTotal)"
+                        dot={false}
+                        activeDot={{ r: 4, strokeWidth: 2, stroke: p.tooltipBg }}
                       />
                       <Line
                         type="monotone"
                         dataKey="newVisitors"
-                        name="New Visitors"
-                        stroke={METRIC_COLORS.newVisitors}
+                        name="New visitors"
+                        stroke={p.newVisitors}
                         strokeWidth={2}
-                        strokeDasharray="4 4"
-                        dot={{ r: 3, fill: METRIC_COLORS.newVisitors, stroke: '#fff', strokeWidth: 1.5 }}
-                        activeDot={{ r: 5 }}
+                        dot={false}
+                        activeDot={{ r: 4, strokeWidth: 2, stroke: p.tooltipBg }}
                       />
                       {showUnique && (
                         <Line
                           type="monotone"
                           dataKey="uniqueVisitors"
-                          name="Unique Visitors"
-                          stroke={METRIC_COLORS.uniqueVisitors}
+                          name="Unique visitors"
+                          stroke={p.uniqueVisitors}
                           strokeWidth={2}
-                          strokeDasharray="2 4"
-                          dot={{ r: 3, fill: METRIC_COLORS.uniqueVisitors, stroke: '#fff', strokeWidth: 1.5 }}
-                          activeDot={{ r: 5 }}
+                          strokeDasharray="3 4"
+                          dot={false}
+                          activeDot={{ r: 4, strokeWidth: 2, stroke: p.tooltipBg }}
                         />
                       )}
-                    </LineChart>
+                    </ComposedChart>
                   </ResponsiveContainer>
                 )}
               </div>
             </Card>
 
             <Card className="md:col-span-6">
-              <CardHeader title="Top Countries" />
+              <CardHeader title="Top countries" />
               <RowChart
                 items={(data?.topCountries ?? []).map((c) => ({
                   label: countryName(c.country),
                   total: Number(c.total ?? 0),
                   newVisitors: Number(c.newVisitors ?? 0),
                 }))}
-                accent="#2563eb"
+                accent={p.total}
+                track={p.track}
                 emptyText="No country data yet."
               />
             </Card>
 
             <Card className="md:col-span-6">
-              <CardHeader title="Top Cities" />
+              <CardHeader title="Top cities" />
               <RowChart
                 items={(data?.topCities ?? []).map((c) => ({
                   label: c.city || 'Unknown',
@@ -438,14 +440,15 @@ export default function AnalyticsPage() {
                   total: Number(c.total ?? 0),
                   newVisitors: Number(c.newVisitors ?? 0),
                 }))}
-                accent="#007d55"
+                accent={p.uniqueVisitors}
+                track={p.track}
                 emptyText="No city data yet."
               />
             </Card>
 
             <Card className="md:col-span-12">
-              <CardHeader title="Device Breakdown" />
-              <DeviceBreakdown devices={data?.deviceBreakdown ?? []} chartC={chartC} />
+              <CardHeader title="Device breakdown" />
+              <DeviceBreakdown devices={data?.deviceBreakdown ?? []} p={p} />
             </Card>
           </div>
         )}
@@ -461,7 +464,7 @@ function SegmentedControl({ options, value, onChange, ariaLabel }) {
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className="flex w-full rounded-lg border border-outline-variant bg-surface-container-lowest p-1 shadow-soft md:inline-flex md:w-auto"
+      className="flex w-full rounded-lg border border-outline-variant bg-surface-container-low p-1 md:inline-flex md:w-auto"
     >
       {options.map((opt) => {
         const active = opt.value === value;
@@ -476,18 +479,18 @@ function SegmentedControl({ options, value, onChange, ariaLabel }) {
             onClick={() => !disabled && onChange(opt.value)}
             title={disabled && opt.comingSoon ? 'Coming soon' : undefined}
             className={
-              'flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-body-sm transition-colors md:flex-initial ' +
+              'flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-body-sm transition-all md:flex-initial ' +
               (active
-                ? 'bg-primary-container text-on-primary font-semibold shadow-soft'
+                ? 'bg-surface-container-lowest font-semibold text-on-surface shadow-soft'
                 : disabled
                   ? 'cursor-not-allowed text-secondary opacity-60'
-                  : 'text-secondary hover:text-primary')
+                  : 'font-medium text-on-surface-variant hover:text-on-surface')
             }
           >
             <span className="inline-flex items-center gap-1.5">
               {opt.label}
               {opt.comingSoon && (
-                <span className="rounded-full bg-tertiary-container px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-on-tertiary-container">
+                <span className="rounded-full bg-surface-container-high px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-secondary">
                   Soon
                 </span>
               )}
@@ -503,7 +506,7 @@ function Card({ className = '', children }) {
   return (
     <div
       className={
-        'rounded-2xl border border-outline-variant bg-surface-container-lowest p-md shadow-soft ' +
+        'rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-soft ' +
         className
       }
     >
@@ -512,10 +515,13 @@ function Card({ className = '', children }) {
   );
 }
 
-function CardHeader({ title, children }) {
+function CardHeader({ title, subtitle, children }) {
   return (
-    <div className="mb-md flex items-center justify-between">
-      <h2 className="text-headline-md font-semibold text-on-surface">{title}</h2>
+    <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h2 className="text-headline-md text-on-surface">{title}</h2>
+        {subtitle && <p className="mt-0.5 text-body-sm text-on-surface-variant">{subtitle}</p>}
+      </div>
       {children}
     </div>
   );
@@ -535,64 +541,63 @@ function TimezoneBadge({ tz }) {
   );
 }
 
-function Legend2({ showUnique = true }) {
+function Legend({ showUnique = true, p }) {
   return (
-    <div className="hidden gap-md text-body-sm text-secondary sm:flex">
-      <LegendDot color={METRIC_COLORS.total} label="Total Clicks" />
-      <LegendDot color={METRIC_COLORS.newVisitors} label="New Visitors" />
-      {showUnique && <LegendDot color={METRIC_COLORS.uniqueVisitors} label="Unique Visitors" />}
+    <div className="hidden gap-4 text-body-sm text-on-surface-variant sm:flex">
+      <LegendDot color={p.total} label="Total clicks" />
+      <LegendDot color={p.newVisitors} label="New visitors" />
+      {showUnique && <LegendDot color={p.uniqueVisitors} label="Unique visitors" />}
     </div>
   );
 }
 
 function LegendDot({ color, label }) {
   return (
-    <span className="flex items-center gap-1">
-      <span className="h-3 w-3 rounded-full" style={{ background: color }} />
+    <span className="flex items-center gap-1.5">
+      <span className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
       {label}
     </span>
   );
 }
 
-function SummaryCard({ label, value, accent, icon, className = '' }) {
+function Stat({ label, value, icon, tone, className = '' }) {
   return (
     <div
       className={
-        'rounded-2xl border border-outline-variant bg-surface-container-lowest p-md shadow-soft ' +
+        'relative overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-soft ' +
         className
       }
     >
       <div className="flex items-center justify-between">
-        <div>
-          <div className="text-label-caps uppercase text-secondary">{label}</div>
-          <div className={`mt-1 text-display-lg font-bold leading-none ${accent}`}>
-            {Number(value).toLocaleString()}
-          </div>
-        </div>
-        <div className="grid h-12 w-12 place-items-center rounded-xl bg-secondary-container text-primary">
-          <span className="material-symbols-outlined">{icon}</span>
-        </div>
+        <span className="text-label-caps uppercase text-secondary">{label}</span>
+        <span
+          className="grid h-9 w-9 place-items-center rounded-lg"
+          style={{ background: `${tone}1f`, color: tone }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{icon}</span>
+        </span>
+      </div>
+      <div className="tnum mt-3 text-[40px] font-extrabold leading-none tracking-tight text-on-surface">
+        {Number(value).toLocaleString()}
       </div>
     </div>
   );
 }
 
-function RowChart({ items, accent, emptyText }) {
+function RowChart({ items, accent, track, emptyText }) {
   if (!items || items.length === 0) {
     return <EmptyChart message={emptyText} />;
   }
   const max = Math.max(...items.map((i) => i.total)) || 1;
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-3.5">
       {items.map((item, idx) => {
         const pct = (item.total / max) * 100;
-        const opacity = 1 - idx * 0.12;
+        const opacity = Math.max(0.45, 1 - idx * 0.1);
         return (
           <li key={`${item.label}-${idx}`} className="group">
-            {/* Mobile: stack label on top, bar + count below — gives the bar full row width.
-                sm+ : single horizontal row with fixed-width label column. */}
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-              <div className="min-w-0 text-body-sm text-on-surface sm:w-[140px] sm:flex-shrink-0">
+            <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+              <div className="min-w-0 text-body-sm text-on-surface sm:w-[150px] sm:flex-shrink-0">
                 <div className="truncate font-medium" title={item.label}>
                   {item.label}
                 </div>
@@ -604,22 +609,16 @@ function RowChart({ items, accent, emptyText }) {
               </div>
               <div className="flex flex-1 items-center gap-3">
                 <div
-                  className="relative h-3 flex-1 overflow-hidden rounded-full bg-surface-container-high"
-                  title={`${item.total.toLocaleString()} clicks · ${item.newVisitors.toLocaleString()} unique`}
+                  className="relative h-2.5 flex-1 overflow-hidden rounded-full"
+                  style={{ background: track }}
+                  title={`${item.total.toLocaleString()} clicks · ${item.newVisitors.toLocaleString()} new`}
                 >
                   <div
-                    className="h-full rounded-full transition-[width] duration-500"
-                    style={{
-                      width: `${pct}%`,
-                      backgroundColor: accent,
-                      opacity: Math.max(0.35, opacity),
-                    }}
+                    className="h-full rounded-full transition-[width] duration-700 ease-out"
+                    style={{ width: `${pct}%`, backgroundColor: accent, opacity }}
                   />
-                  <div className="pointer-events-none absolute inset-0 hidden items-center justify-end pr-2 text-[11px] font-semibold text-on-surface group-hover:flex">
-                    {item.total.toLocaleString()}
-                  </div>
                 </div>
-                <div className="w-14 text-right text-body-sm font-medium text-on-surface sm:w-20">
+                <div className="tnum w-14 text-right text-body-sm font-semibold text-on-surface sm:w-20">
                   {item.total.toLocaleString()}
                 </div>
               </div>
@@ -631,7 +630,7 @@ function RowChart({ items, accent, emptyText }) {
   );
 }
 
-function DeviceBreakdown({ devices, chartC }) {
+function DeviceBreakdown({ devices, p }) {
   const total = devices.reduce((s, d) => s + Number(d.total ?? 0), 0);
   if (!devices.length || total === 0) {
     return <EmptyChart message="No device data yet." />;
@@ -643,63 +642,63 @@ function DeviceBreakdown({ devices, chartC }) {
   }));
 
   return (
-    <div className="grid grid-cols-1 items-center gap-md md:grid-cols-2">
-      <div className="h-64 w-full">
+    <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-2">
+      <div className="relative h-60 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Tooltip
               contentStyle={{
-                background: chartC.tooltipBg,
-                border: `1px solid ${chartC.tooltipBorder}`,
+                background: p.tooltipBg,
+                border: `1px solid ${p.tooltipBorder}`,
                 borderRadius: 12,
                 fontSize: 12,
-                color: chartC.tooltipText,
-                boxShadow: '0 8px 16px rgba(0,0,0,0.18)',
+                color: p.tooltipText,
+                boxShadow: '0 10px 30px -10px rgba(0,0,0,0.25)',
               }}
-              labelStyle={{ color: chartC.tooltipText }}
-              itemStyle={{ color: chartC.tooltipText }}
+              labelStyle={{ color: p.tooltipText }}
+              itemStyle={{ color: p.tooltipText }}
               formatter={(value, name, item) => {
                 const pct = item?.payload?.pct ?? 0;
-                return [`${pct.toFixed(1)}% (${Number(value).toLocaleString()})`, name];
+                return [`${pct.toFixed(1)}% (${Number(value).toLocaleString()})`, titleCase(name)];
               }}
             />
             <Pie
               data={data}
               dataKey="value"
               nameKey="name"
-              innerRadius="55%"
-              outerRadius="85%"
+              innerRadius="62%"
+              outerRadius="88%"
               paddingAngle={2}
-              stroke={chartC.pieStroke}
+              stroke={p.pieStroke}
+              strokeWidth={2}
             >
               {data.map((entry) => (
-                <Cell key={entry.name} fill={DEVICE_COLORS[entry.name] ?? '#737686'} />
+                <Cell key={entry.name} fill={p.device[entry.name] ?? p.device.UNKNOWN} />
               ))}
             </Pie>
-            <Legend
-              verticalAlign="bottom"
-              iconType="circle"
-              formatter={(value) => (
-                <span className="text-body-sm text-on-surface-variant">{value}</span>
-              )}
-            />
           </PieChart>
         </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className="tnum text-headline-md font-extrabold text-on-surface">
+            {total.toLocaleString()}
+          </span>
+          <span className="text-label-caps uppercase text-secondary">Clicks</span>
+        </div>
       </div>
       <ul className="space-y-2">
         {data.map((d) => (
           <li
             key={d.name}
-            className="flex items-center justify-between rounded-lg border border-outline-variant bg-surface px-3 py-2"
+            className="flex items-center justify-between rounded-lg border border-outline-variant bg-surface-container-low px-3.5 py-2.5"
           >
-            <span className="flex items-center gap-2 text-body-sm text-on-surface">
+            <span className="flex items-center gap-2.5 text-body-sm text-on-surface">
               <span
                 className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: DEVICE_COLORS[d.name] ?? '#737686' }}
+                style={{ backgroundColor: p.device[d.name] ?? p.device.UNKNOWN }}
               />
-              {d.name.charAt(0) + d.name.slice(1).toLowerCase()}
+              {titleCase(d.name)}
             </span>
-            <span className="text-body-sm font-semibold text-on-surface">
+            <span className="tnum text-body-sm font-semibold text-on-surface">
               {d.pct.toFixed(1)}%
             </span>
           </li>
@@ -709,33 +708,38 @@ function DeviceBreakdown({ devices, chartC }) {
   );
 }
 
+function titleCase(s) {
+  if (!s) return '';
+  return s.charAt(0) + s.slice(1).toLowerCase();
+}
+
 function EmptyChart({ message }) {
   return (
-    <div className="grid h-full min-h-[140px] place-items-center rounded-xl border border-dashed border-outline-variant bg-surface px-4 py-8 text-body-sm text-secondary">
+    <div className="grid h-full min-h-[160px] place-items-center rounded-xl border border-dashed border-outline-variant bg-surface-container-low px-4 py-8 text-body-sm text-secondary">
       {message}
     </div>
   );
 }
 
 // Custom tooltip — iterates Recharts' payload directly. payload contains one
-// entry per <Line> currently rendered, so we get 3 rows on dynamic ranges and
+// entry per series currently rendered, so we get 3 rows on dynamic ranges and
 // 2 on All-Time without any in-tooltip conditionals.
-function MetricTooltip({ active, payload, label, granularity, chartC }) {
+function MetricTooltip({ active, payload, label, granularity, p }) {
   if (!active || !payload || payload.length === 0) return null;
   return (
     <div
       style={{
-        background: chartC.tooltipBg,
-        border: `1px solid ${chartC.tooltipBorder}`,
+        background: p.tooltipBg,
+        border: `1px solid ${p.tooltipBorder}`,
         borderRadius: 12,
-        color: chartC.tooltipText,
-        boxShadow: '0 8px 16px rgba(0,0,0,0.18)',
-        padding: '8px 12px',
+        color: p.tooltipText,
+        boxShadow: '0 10px 30px -10px rgba(0,0,0,0.25)',
+        padding: '10px 12px',
         fontSize: 12,
-        minWidth: 180,
+        minWidth: 184,
       }}
     >
-      <div style={{ fontWeight: 600, marginBottom: 6 }}>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>
         {formatTooltipLabel(label, granularity)}
       </div>
       {payload.map((entry) => (
@@ -752,12 +756,12 @@ function MetricTooltip({ active, payload, label, granularity, chartC }) {
 
 function TooltipRow({ color, label, value }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 2 }}>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 3 }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
         <span style={{ width: 8, height: 8, borderRadius: 999, background: color, display: 'inline-block' }} />
         {label}
       </span>
-      <span style={{ fontWeight: 600 }}>{value}</span>
+      <span style={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{value}</span>
     </div>
   );
 }

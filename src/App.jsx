@@ -15,7 +15,7 @@ const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 function FullScreenLoader() {
   return (
     <div className="grid min-h-screen place-items-center bg-background">
-      <Spinner size={28} color="#2a4cff" label="Loading…" />
+      <Spinner size={28} color="rgb(37 99 235)" label="Loading…" />
     </div>
   );
 }

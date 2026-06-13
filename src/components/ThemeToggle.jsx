@@ -10,11 +10,15 @@ export default function ThemeToggle({ className = '' }) {
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={
-        'grid h-9 w-9 place-items-center rounded-full border border-outline-variant bg-surface-container-lowest text-secondary transition-colors hover:bg-surface-container hover:text-primary ' +
+        'grid h-9 w-9 place-items-center rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant transition-colors hover:border-outline hover:text-on-surface ' +
         className
       }
     >
-      <span className="material-symbols-outlined" style={{ fontSize: 20 }} aria-hidden>
+      <span
+        className="material-symbols-outlined transition-transform duration-300"
+        style={{ fontSize: 19 }}
+        aria-hidden
+      >
         {isDark ? 'light_mode' : 'dark_mode'}
       </span>
     </button>

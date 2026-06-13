@@ -17,13 +17,13 @@ export default function EnvGate({ children }) {
 
   return (
     <div className="grid min-h-screen place-items-center bg-background px-gutter py-margin">
-      <div className="brand-border w-full max-w-lg rounded-2xl bg-surface-container-lowest p-lg shadow-elevated">
+      <div className="w-full max-w-lg rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-elevated md:p-8">
         <div className="flex items-start gap-3">
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-error-container text-error">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-error-container text-error">
             <span className="material-symbols-outlined">build_circle</span>
           </div>
           <div className="flex-1">
-            <h1 className="text-headline-md font-semibold text-on-surface">
+            <h1 className="text-headline-md text-on-surface">
               GoLinkGone isn't configured.
             </h1>
             <p className="mt-1 text-body-sm text-on-surface-variant">
