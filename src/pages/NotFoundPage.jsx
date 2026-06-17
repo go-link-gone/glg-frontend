@@ -6,7 +6,7 @@ import GridBackground from '../components/GridBackground';
 
 export default function NotFoundPage() {
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="animate-fade-in relative flex min-h-screen flex-col bg-background">
       <header className="relative z-10 w-full border-b border-outline-variant/80 bg-surface/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-max-width items-center justify-between px-gutter">
           <BrandMark size={30} />

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { createShortLink } from '../lib/api';
+import { createShortLink, createQr } from '../lib/api';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
 import TopNav from '../components/TopNav';
@@ -8,14 +8,11 @@ import Footer from '../components/Footer';
 import Spinner from '../components/Spinner';
 import GridBackground from '../components/GridBackground';
 
-function qrSrc(qrBase64) {
-  if (!qrBase64) return null;
-  return `data:image/png;base64,${qrBase64}`;
-}
+const QrStudio = lazy(() => import('../components/QrStudio'));
 
 const FEATURES = [
   ['bolt', 'Sub-second redirects', 'An in-memory key store backed by Postgres lands every click instantly.'],
-  ['qr_code_2', 'QR codes built in', 'Every short link ships with a print-ready QR you can download in one click.'],
+  ['qr_code_2', 'Customizable QR codes', 'Design branded QR codes — colors, shapes, logo, and frames — then export as PNG or SVG.'],
   ['insights', 'Click analytics', 'Country, city, device, and deduplicated unique-visitor counts per link.'],
 ];
 
@@ -26,6 +23,23 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [savingQr, setSavingQr] = useState(false);
+  const [qrSaved, setQrSaved] = useState(false);
+
+  const saveQr = async (config) => {
+    if (!result?.shortUrl) return;
+    const shortKey = result.shortUrl.split('/').pop();
+    setSavingQr(true);
+    try {
+      await createQr(shortKey, null, config);
+      setQrSaved(true);
+      pushToast({ type: 'success', title: 'QR saved', message: 'Find it under My Links → Details' });
+    } catch (err) {
+      pushToast({ type: 'error', title: 'Could not save QR', message: err.message });
+    } finally {
+      setSavingQr(false);
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -40,6 +54,7 @@ export default function HomePage() {
     }
     setLoading(true);
     setResult(null);
+    setQrSaved(false);
     try {
       const data = await createShortLink(url.trim());
       setResult(data);
@@ -62,19 +77,8 @@ export default function HomePage() {
     }
   };
 
-  const downloadQr = () => {
-    if (!result?.qrCode) return;
-    const a = document.createElement('a');
-    a.href = qrSrc(result.qrCode);
-    const shortKey = (result.shortUrl || 'qr').split('/').pop();
-    a.download = `${shortKey || 'qr'}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  };
-
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="animate-fade-in relative flex min-h-screen flex-col bg-background">
       <TopNav />
 
       <main className="relative flex-1">
@@ -93,10 +97,34 @@ export default function HomePage() {
               Measure every click.
             </h1>
             <p className="animate-fade-up mx-auto mt-4 max-w-xl text-body-lg text-on-surface-variant">
-              Paste a URL to get a fast, trackable short link with a built-in QR code —
+              Paste a URL to get a fast, trackable short link with a fully customizable QR code —
               then see exactly where your traffic comes from.
             </p>
           </section>
+
+          {/* Sign-in nudge (only when logged out) */}
+          {!user && (
+            <Link
+              to="/auth"
+              className="animate-fade-up group mx-auto mt-6 flex max-w-2xl items-center gap-3 rounded-xl border border-primary/30 bg-brand-gradient-soft px-4 py-3 shadow-soft transition-colors hover:border-primary/50"
+            >
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-gradient text-white">
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                  insights
+                </span>
+              </span>
+              <span className="flex-1 text-body-sm text-on-surface">
+                <span className="font-semibold">Sign in to get analytics</span> — track clicks, countries,
+                cities &amp; devices for every link you create.
+              </span>
+              <span
+                className="material-symbols-outlined shrink-0 text-primary transition-transform group-hover:translate-x-0.5"
+                style={{ fontSize: 18 }}
+              >
+                arrow_forward
+              </span>
+            </Link>
+          )}
 
           {/* Shortener */}
           <form
@@ -140,8 +168,9 @@ export default function HomePage() {
           </form>
 
           {result && (
+            <>
             <div className="animate-scale-in mx-auto mt-4 w-full max-w-2xl overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-soft">
-              <div className="flex flex-col gap-6 p-5 md:flex-row md:items-stretch md:p-6">
+              <div className="flex flex-col gap-4 p-5 md:p-6">
                 <div className="min-w-0 flex-1 space-y-4">
                   <div>
                     <div className="text-label-caps uppercase text-secondary">Destination</div>
@@ -185,32 +214,55 @@ export default function HomePage() {
                   )}
                 </div>
 
-                <div className="flex flex-col items-center gap-2.5 border-outline-variant md:border-l md:pl-6">
-                  <div className="grid h-40 w-40 place-items-center rounded-xl border border-outline-variant bg-white p-2.5">
-                    {result.qrCode ? (
-                      <img
-                        src={qrSrc(result.qrCode)}
-                        alt="QR code for the short link"
-                        className="h-full w-full object-contain"
-                      />
-                    ) : (
-                      <span className="text-body-sm text-secondary">No QR</span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={downloadQr}
-                    disabled={!result.qrCode}
-                    className="inline-flex items-center gap-1 text-body-sm font-medium text-on-surface-variant transition-colors hover:text-on-surface disabled:opacity-50"
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
-                      download
-                    </span>
-                    Download QR
-                  </button>
-                </div>
               </div>
             </div>
+
+            <div className="animate-scale-in mx-auto mt-4 w-full max-w-2xl rounded-2xl border border-outline-variant bg-surface-container-lowest p-5 shadow-soft md:p-6">
+              <div className="mb-4">
+                <h3 className="text-body-md font-semibold text-on-surface">Customize your QR code</h3>
+                <p className="mt-0.5 text-body-sm text-on-surface-variant">
+                  {user
+                    ? 'Style it, download, or save it to this link.'
+                    : 'Style it and download — sign in to save designs.'}
+                </p>
+              </div>
+              {qrSaved ? (
+                <div className="flex flex-col items-center gap-3 py-8 text-center">
+                  <span className="material-symbols-outlined text-success" style={{ fontSize: 40 }}>
+                    check_circle
+                  </span>
+                  <p className="text-body-md text-on-surface">QR code saved to this link.</p>
+                  <div className="flex gap-2">
+                    <Link to="/links" className="brand-btn rounded-lg px-4 py-2.5 text-body-sm">
+                      View in My Links
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setQrSaved(false)}
+                      className="rounded-lg border border-outline-variant px-4 py-2.5 text-body-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
+                    >
+                      Customize another
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Suspense
+                  fallback={
+                    <div className="grid place-items-center py-8">
+                      <Spinner size={20} color="rgb(37 99 235)" label="Loading QR studio…" />
+                    </div>
+                  }
+                >
+                  <QrStudio
+                    data={result.shortUrl}
+                    fileName={result.shortUrl.split('/').pop()}
+                    onSave={user ? saveQr : undefined}
+                    saving={savingQr}
+                  />
+                </Suspense>
+              )}
+            </div>
+            </>
           )}
 
           {/* Feature row */}

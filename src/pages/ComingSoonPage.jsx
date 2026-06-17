@@ -30,7 +30,7 @@ export default function ComingSoonPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="animate-fade-in relative flex min-h-screen flex-col bg-background">
       {session ? (
         <TopNav />
       ) : (

@@ -59,7 +59,7 @@ export default function ResetPasswordPage() {
     'mt-1.5 block h-11 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3.5 text-body-md text-on-surface outline-none transition-colors placeholder:text-outline focus:border-primary/70 focus:ring-2 focus:ring-primary/15 disabled:opacity-50';
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="animate-fade-in relative flex min-h-screen flex-col bg-background">
       <header className="relative z-10 w-full border-b border-outline-variant/80 bg-surface/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-max-width items-center justify-between px-gutter">
           <BrandMark size={30} />

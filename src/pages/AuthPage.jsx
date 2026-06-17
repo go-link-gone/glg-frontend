@@ -46,6 +46,7 @@ export default function AuthPage() {
   const [error, setError] = useState(null);
   const [info, setInfo] = useState(null);
   const [resendIn, setResendIn] = useState(0);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const otpInputRef = useRef(null);
   useEffect(() => {
@@ -164,11 +165,16 @@ export default function AuthPage() {
 
   const handleGoogle = async () => {
     clearStatus();
+    setGoogleLoading(true);
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
     });
-    if (err) setError(err.message);
+    if (err) {
+      setError(err.message);
+      setGoogleLoading(false);
+    }
+    // On success the browser redirects to Google, so we leave the spinner showing.
   };
 
   const cardHeading =
@@ -219,7 +225,7 @@ export default function AuthPage() {
               Understand clicks.
             </h1>
             <p className="mt-4 max-w-md text-body-lg text-on-surface-variant">
-              Turn any URL into a fast, trackable short link with a built-in QR code —
+              Turn any URL into a fast, trackable short link with a fully customizable QR code —
               and get per-click analytics across country, city, and device.
             </p>
             <ul className="mt-8 space-y-4">
@@ -444,10 +450,20 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={handleGoogle}
-                  className="mt-6 flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md font-medium text-on-surface transition-colors hover:bg-surface-container"
+                  disabled={googleLoading}
+                  className="mt-6 flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md font-medium text-on-surface transition-colors hover:bg-surface-container disabled:opacity-70"
                 >
-                  <GoogleIcon />
-                  Continue with Google
+                  {googleLoading ? (
+                    <>
+                      <Spinner size={18} color="rgb(37 99 235)" />
+                      Redirecting…
+                    </>
+                  ) : (
+                    <>
+                      <GoogleIcon />
+                      Continue with Google
+                    </>
+                  )}
                 </button>
               </>
             )}

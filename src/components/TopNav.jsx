@@ -73,7 +73,12 @@ export default function TopNav() {
             aria-label="Toggle navigation menu"
             aria-expanded={navOpen}
           >
-            <span className="material-symbols-outlined">{navOpen ? 'close' : 'menu'}</span>
+            <span
+              className="material-symbols-outlined transition-transform duration-200"
+              style={{ transform: navOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
+            >
+              {navOpen ? 'close' : 'menu'}
+            </span>
           </button>
           <BrandMark size={30} />
           <nav className="hidden items-center gap-7 md:flex">
@@ -168,7 +173,7 @@ export default function TopNav() {
           ) : (
             <NavLink
               to="/auth"
-              className="brand-btn flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-body-sm"
+              className="brand-btn flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 py-2 text-body-sm"
             >
               Sign in
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>

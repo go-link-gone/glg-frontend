@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-export default function Modal({ open, onClose, children, labelledBy }) {
+export default function Modal({ open, onClose, children, labelledBy, widthClass = 'max-w-md' }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -28,7 +28,9 @@ export default function Modal({ open, onClose, children, labelledBy }) {
       aria-modal="true"
       aria-labelledby={labelledBy}
     >
-      <div className="animate-scale-in my-auto w-full max-w-md rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-elevated">
+      <div
+        className={`animate-scale-in my-auto w-full ${widthClass} rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-elevated`}
+      >
         {children}
       </div>
     </div>,

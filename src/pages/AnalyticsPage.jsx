@@ -232,7 +232,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="animate-fade-in flex min-h-screen flex-col bg-background">
       <TopNav />
 
       <main className="mx-auto w-full max-w-max-width flex-1 px-gutter py-margin md:py-lg">

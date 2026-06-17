@@ -89,6 +89,42 @@ export async function deleteLink(shortKey) {
   return true;
 }
 
+export async function fetchLinkQrs(shortKey) {
+  const headers = await authHeaders();
+  const res = await fetch(`${API_BASE_URL}/${encodeURIComponent(shortKey)}/qr`, { headers });
+  return handle(res);
+}
+
+export async function createQr(shortKey, label, config) {
+  const headers = { 'Content-Type': 'application/json', ...(await authHeaders()) };
+  const res = await fetch(`${API_BASE_URL}/${encodeURIComponent(shortKey)}/qr`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ label, config }),
+  });
+  return handle(res);
+}
+
+export async function updateQr(qrId, label, config) {
+  const headers = { 'Content-Type': 'application/json', ...(await authHeaders()) };
+  const res = await fetch(`${API_BASE_URL}/qr/${encodeURIComponent(qrId)}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({ label, config }),
+  });
+  return handle(res);
+}
+
+export async function deleteQr(qrId) {
+  const headers = await authHeaders();
+  const res = await fetch(`${API_BASE_URL}/qr/${encodeURIComponent(qrId)}`, {
+    method: 'DELETE',
+    headers,
+  });
+  if (!res.ok) await handle(res);
+  return true;
+}
+
 export async function deleteAccount() {
   const headers = await authHeaders();
   const res = await fetch(`${API_BASE_URL}/account`, {
