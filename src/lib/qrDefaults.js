@@ -48,7 +48,7 @@ export const DEFAULT_QR_CONFIG = {
   cornersDotOptions: { type: 'square', color: '#000000' },
   backgroundOptions: { color: '#ffffff' },
   imageOptions: { mode: 'center', imageSize: 0.45, margin: 1 },
-  useLogo: false,
+  useLogo: true,
 };
 
 export function titleCase(slug) {
