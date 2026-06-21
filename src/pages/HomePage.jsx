@@ -78,7 +78,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="animate-fade-in relative flex min-h-screen flex-col bg-background">
+    <div className="relative flex min-h-screen flex-col bg-background">
       <TopNav />
 
       <main className="relative flex-1">
@@ -87,16 +87,16 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto w-full max-w-max-width px-gutter pt-xl pb-lg">
           {/* Hero */}
           <section className="mx-auto max-w-2xl text-center">
-            <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest px-3 py-1 text-label-caps uppercase text-on-surface-variant shadow-soft">
+            <div className="animate-rise-up inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest px-3 py-1 text-label-caps uppercase text-on-surface-variant shadow-soft">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
               {user ? `Signed in as ${user.email}` : 'URL shortener + click analytics'}
             </div>
-            <h1 className="animate-fade-up mt-5 text-[clamp(34px,5.6vw,56px)] font-extrabold leading-[1.05] tracking-[-0.03em] text-on-surface">
+            <h1 className="animate-rise-up mt-5 text-[clamp(34px,5.6vw,56px)] font-extrabold leading-[1.05] tracking-[-0.03em] text-on-surface">
               Shorten any link.
               <br />
               Measure every click.
             </h1>
-            <p className="animate-fade-up mx-auto mt-4 max-w-xl text-body-lg text-on-surface-variant">
+            <p className="animate-rise-up mx-auto mt-4 max-w-xl text-body-lg text-on-surface-variant">
               Paste a URL to get a fast, trackable short link with a fully customizable QR code —
               then see exactly where your traffic comes from.
             </p>

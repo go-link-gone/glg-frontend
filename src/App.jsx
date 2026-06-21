@@ -1,14 +1,15 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
-import MyLinksPage from './pages/MyLinksPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ComingSoonPage from './pages/ComingSoonPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
 import Spinner from './components/Spinner';
 
+
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const MyLinksPage = lazy(() => import('./pages/MyLinksPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 // Recharts is heavy; only pay for it when the user opens an analytics page.
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 
